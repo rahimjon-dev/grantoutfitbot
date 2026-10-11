@@ -99,6 +99,8 @@ export default function CartDrawer() {
                     <img
                       src={img}
                       alt={name}
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
                       className="w-20 h-24 object-cover rounded-xl bg-zinc-950 flex-shrink-0"
                     />
 

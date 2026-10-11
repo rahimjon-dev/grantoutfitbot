@@ -49,7 +49,7 @@ export default function Catalog({ categories, products, selectedCategory, onSele
   return (
     <div className="space-y-6 pb-12">
       {/* Search & Sort Controls Bar */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
         {/* Search Input */}
         <div className="relative flex-1">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -93,7 +93,7 @@ export default function Catalog({ categories, products, selectedCategory, onSele
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         <button
           onClick={() => onSelectCategory('all')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+          className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
             !selectedCategory || selectedCategory === 'all'
               ? 'bg-gold-500 text-black shadow-md shadow-gold-500/20'
               : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'
@@ -108,7 +108,7 @@ export default function Catalog({ categories, products, selectedCategory, onSele
             <button
               key={c.id}
               onClick={() => onSelectCategory(c.slug)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 isSelected
                   ? 'bg-gold-500 text-black shadow-md shadow-gold-500/20'
                   : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'
@@ -133,7 +133,7 @@ export default function Catalog({ categories, products, selectedCategory, onSele
         )}
       </div>
 
-      {/* Products Grid */}
+      {/* Products Grid: 2 on mobile, 3 on tablet, 4 on desktop */}
       {filteredProducts.length === 0 ? (
         <div className="py-20 text-center space-y-3">
           <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-500">
@@ -154,7 +154,7 @@ export default function Catalog({ categories, products, selectedCategory, onSele
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
           {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}

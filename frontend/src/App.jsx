@@ -65,7 +65,7 @@ export default function App() {
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main App Content Viewport */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:py-8 mb-16 md:mb-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8 mb-16 md:mb-8">
         {loading ? (
           <div className="py-24 flex flex-col items-center justify-center space-y-4">
             <div className="w-10 h-10 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />

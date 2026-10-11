@@ -110,6 +110,8 @@ export default function Orders({ onNavigateToCatalog }) {
                         <img
                           src={item.product_image_url}
                           alt={item.product_name}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
                           className="w-12 h-14 object-cover rounded-lg bg-zinc-900 flex-shrink-0"
                         />
                       )}
