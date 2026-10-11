@@ -5,10 +5,18 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { config } from './config/index.js';
 
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.resolve(__dirname, '../../frontend/dist');
 
 const app = express();
 
@@ -54,10 +62,19 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 
-// 404 Route Handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'NOT_FOUND', message: `Route ${req.method} ${req.url} not found` });
-});
+// Serve frontend static build in production if available
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+} else {
+  // 404 Route Handler for API
+  app.use((req, res) => {
+    res.status(404).json({ error: 'NOT_FOUND', message: `Route ${req.method} ${req.url} not found` });
+  });
+}
 
 // Centralized Error Handler
 app.use((err, req, res, next) => {
