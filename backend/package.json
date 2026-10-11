@@ -1,6 +1,7 @@
 {
   "name": "grant-outfitbot-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "Express Backend for Grant Outfitbot with Supabase and Telegram Authentication",
   "main": "src/server.js",
   "scripts": {

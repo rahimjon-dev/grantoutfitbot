@@ -1,6 +1,7 @@
 {
   "name": "grant-outfitbot-bot",
   "version": "1.0.0",
+  "type": "module",
   "description": "Telegram Bot for Grant Outfitbot Online Store",
   "main": "src/bot.js",
   "scripts": {
