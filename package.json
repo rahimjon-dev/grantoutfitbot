@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "description": "Premium Telegram Online Store Mini App, Bot & Express Backend with Supabase",
   "scripts": {
-    "install:all": "npm run install:backend && npm run install:bot && npm run install:frontend",
-    "install:backend": "cd backend && npm install",
-    "install:bot": "cd bot && npm install",
-    "install:frontend": "cd frontend && npm install",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:bot": "cd bot && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev": "concurrently -n \"BACKEND,BOT,FRONTEND\" -c \"blue,green,magenta\" \"npm run dev:backend\" \"npm run dev:bot\" \"npm run dev:frontend\"",
-    "build:frontend": "cd frontend && npm run build"
+    "install:all": "npm --prefix backend install && npm --prefix bot install && npm --prefix frontend install",
+    "install:backend": "npm --prefix backend install",
+    "install:bot": "npm --prefix bot install",
+    "install:frontend": "npm --prefix frontend install",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:bot": "npm --prefix bot run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "concurrently -n \"BACKEND,BOT,FRONTEND\" -c \"blue,green,magenta\" \"npm --prefix backend run dev\" \"npm --prefix bot run dev\" \"npm --prefix frontend run dev\"",
+    "build:frontend": "npm --prefix frontend run build"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

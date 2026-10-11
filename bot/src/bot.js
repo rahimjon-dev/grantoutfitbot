@@ -27,6 +27,20 @@ bot.on(':contact', handleContactShare);
 bot.on('my_chat_member', handleMyChatMember);
 
 // Persistent Keyboard Button Matchers (Multilingual)
+bot.hears([/Onlayn Do‘kon/i, /Онлайн Магазин/i, /Online Store/i], async (ctx) => {
+  if (config.miniAppUrl && config.miniAppUrl.startsWith('https://')) {
+    await ctx.reply('🛍 *GRANT Mini App do‘konini ochish uchun quyidagi tugmani bosing:*', {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [[{ text: '🛍 Do‘konni Ochish', web_app: { url: config.miniAppUrl } }]]
+      }
+    });
+  } else {
+    await ctx.reply(`🛍 *GRANT ONLINE STORE*\n\nDo‘konga kirish havolasi:\n👉 ${config.miniAppUrl}\n\n💡 _Telegram ichida Mini App ochilishi uchun HTTPS havola (masalan, Vercel yoki ngrok) kerak._`, {
+      parse_mode: 'Markdown'
+    });
+  }
+});
 bot.hears([/Buyurtmalarim/i, /Мои Заказы/i, /My Orders/i], handleMyOrders);
 bot.hears([/Profilim/i, /Мой Профиль/i, /My Profile/i], handleProfile);
 bot.hears([/Tilni o‘zgartirish/i, /Сменить Язык/i, /Change Language/i], handleChangeLanguageCommand);

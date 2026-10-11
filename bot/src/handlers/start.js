@@ -7,18 +7,20 @@ export async function handleStart(ctx) {
   const telegramId = ctx.from.id;
   const user = await botDb.getUser(telegramId);
 
-  // Configure Telegram Menu Button to open Mini App
-  try {
-    await ctx.api.setChatMenuButton({
-      chat_id: telegramId,
-      menu_button: {
-        type: 'web_app',
-        text: '🛍 Do‘kon',
-        web_app: { url: config.miniAppUrl }
-      }
-    });
-  } catch (err) {
-    // Menu button may fail in some environments without fatal impact
+  // Configure Telegram Menu Button to open Mini App (requires HTTPS)
+  if (config.miniAppUrl && config.miniAppUrl.startsWith('https://')) {
+    try {
+      await ctx.api.setChatMenuButton({
+        chat_id: telegramId,
+        menu_button: {
+          type: 'web_app',
+          text: '🛍 Do‘kon',
+          web_app: { url: config.miniAppUrl }
+        }
+      });
+    } catch (err) {
+      // Menu button may fail if url is invalid without fatal impact
+    }
   }
 
   // Log user activity

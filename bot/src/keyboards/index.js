@@ -11,8 +11,15 @@ export function getLanguageInlineKeyboard() {
 }
 
 export function getMainReplyKeyboard(lang = 'uz', miniAppUrl) {
-  return new Keyboard()
-    .webApp(t(lang, 'btn_store'), miniAppUrl)
+  const kb = new Keyboard();
+
+  if (miniAppUrl && miniAppUrl.startsWith('https://')) {
+    kb.webApp(t(lang, 'btn_store'), miniAppUrl);
+  } else {
+    kb.text(t(lang, 'btn_store'));
+  }
+
+  return kb
     .row()
     .text(t(lang, 'btn_orders'))
     .text(t(lang, 'btn_profile'))
