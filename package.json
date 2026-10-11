@@ -11,7 +11,7 @@
     "dev:bot": "npm --prefix bot run dev",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev": "concurrently -n \"BACKEND,BOT,FRONTEND\" -c \"blue,green,magenta\" \"npm --prefix backend run dev\" \"npm --prefix bot run dev\" \"npm --prefix frontend run dev\"",
-    "build": "npm --prefix frontend install && npm --prefix frontend run build && npm --prefix backend install && npm --prefix bot install",
+    "build": "npm install --include=dev && npm --prefix frontend install --include=dev && npm --prefix frontend run build && npm --prefix backend install && npm --prefix bot install",
     "build:frontend": "npm --prefix frontend run build",
     "start": "concurrently -n \"API,BOT\" -c \"blue,green\" \"npm --prefix backend start\" \"npm --prefix bot start\""
   },
