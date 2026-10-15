@@ -34,7 +34,7 @@ export function getContactShareKeyboard(lang = 'uz') {
   return new Keyboard()
     .requestContact(t(lang, 'btn_share_contact'))
     .row()
-    .text('⬅️ Bekor qilish / Отмена')
+    .text(t(lang, 'btn_cancel'))
     .resized()
     .oneTime();
 }

@@ -53,9 +53,9 @@ export async function handleProfile(ctx) {
 ${t(lang, 'profile_name')} *${name}*
 ${t(lang, 'profile_phone')} \`${phone}\`
 ${t(lang, 'profile_address')} _${address}_
-🌐 Til: *${lang.toUpperCase()}*
+🌐 ${t(lang, 'profile_lang')} *${lang.toUpperCase()}*
 
-Telefon raqamingizni yangilash uchun quyidagi tugmani bosing:`;
+${t(lang, 'profile_update_prompt')}`;
 
   await ctx.reply(text, {
     parse_mode: 'Markdown',
@@ -80,6 +80,35 @@ export async function handleContactShare(ctx) {
     if (!phone.startsWith('+')) phone = '+' + phone;
 
     await botDb.savePhoneNumber(telegramId, phone);
+    const user = await botDb.getUser(telegramId);
+    const lang = user?.language_code || 'uz';
+
+    await ctx.reply(t(lang, 'phone_received'), {
+      parse_mode: 'Markdown',
+      reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
+    });
+  }
+}
+
+export async function handleCancel(ctx) {
+  const telegramId = ctx.from.id;
+  const user = await botDb.getUser(telegramId);
+  const lang = user?.language_code || 'uz';
+
+  await ctx.reply(t(lang, 'action_cancelled'), {
+    parse_mode: 'Markdown',
+    reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
+  });
+}
+
+export async function handleManualPhone(ctx) {
+  const telegramId = ctx.from.id;
+  const text = ctx.message?.text?.trim() || '';
+  const cleaned = text.replace(/[\s\-\(\)]/g, '');
+
+  if (/^\+?[0-9]{9,15}$/.test(cleaned)) {
+    const formatted = cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
+    await botDb.savePhoneNumber(telegramId, formatted);
     const user = await botDb.getUser(telegramId);
     const lang = user?.language_code || 'uz';
 

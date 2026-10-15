@@ -2,7 +2,7 @@ import { Bot } from 'grammy';
 import { config } from './config/index.js';
 import { handleStart } from './handlers/start.js';
 import { handleLanguageCallback, handleChangeLanguageCommand } from './handlers/language.js';
-import { handleMyOrders, handleProfile, handleSupport, handleContactShare } from './handlers/menu.js';
+import { handleMyOrders, handleProfile, handleSupport, handleContactShare, handleCancel, handleManualPhone } from './handlers/menu.js';
 import { handleAdminCallback, handleAdminCommand, handleMyChatMember } from './handlers/admin.js';
 
 if (!config.botToken) {
@@ -15,6 +15,7 @@ const bot = new Bot(config.botToken || 'dummy_token');
 bot.command('start', handleStart);
 bot.command('admin', handleAdminCommand);
 bot.command('language', handleChangeLanguageCommand);
+bot.command('cancel', handleCancel);
 
 // Callback queries
 bot.callbackQuery(/^set_lang:/, handleLanguageCallback);
@@ -25,6 +26,12 @@ bot.on(':contact', handleContactShare);
 
 // Member status events (tracking block / unblock)
 bot.on('my_chat_member', handleMyChatMember);
+
+// Cancel & Back handlers (matches "⬅️ Bekor qilish / Отмена", "⬅️ Bekor qilish", "⬅️ Отмена", "Cancel", etc.)
+bot.hears([/Bekor qilish/i, /Отмена/i, /Cancel/i], handleCancel);
+
+// Manual phone number typing
+bot.hears(/^\+?[0-9\s\-()]{9,20}$/, handleManualPhone);
 
 // Persistent Keyboard Button Matchers (Multilingual)
 bot.hears([/Onlayn Do‘kon/i, /Онлайн Магазин/i, /Online Store/i], async (ctx) => {

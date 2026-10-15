@@ -8,15 +8,20 @@ export const en = {
   btn_profile: '👤 My Profile',
   btn_language: '🌐 Change Language',
   btn_support: '📞 Contact Support',
+  btn_cancel: '⬅️ Cancel',
 
   // Profile
   profile_title: `👤 *YOUR PROFILE*\n━━━━━━━━━━━━━━━━━━━━`,
   profile_name: `Name:`,
   profile_phone: `Phone:`,
   profile_address: `Delivery Address:`,
+  profile_lang: `Language:`,
   profile_not_set: `Not provided`,
+  profile_update_prompt: `Click the button below to share your contact or type your phone number:`,
   btn_share_contact: `📱 Share Contact Number`,
   phone_received: `✅ Your phone number has been saved successfully!`,
+  action_cancelled: `⬅️ Cancelled. Main menu:`,
+  invalid_phone: `⚠️ Please enter a valid phone number (e.g. +998901234567).`,
 
   // Support
   support_text: `📞 *Customer Concierge Support*\n\nIf you have any questions, our concierge team is at your disposal:\n\n💬 Telegram: @grant_support\n☎️ Phone: +998 (71) 200-00-00\n⏰ Hours: 09:00 - 22:00 (Daily)`,

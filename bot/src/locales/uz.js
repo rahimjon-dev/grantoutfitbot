@@ -8,15 +8,20 @@ export const uz = {
   btn_profile: '👤 Profilim',
   btn_language: '🌐 Tilni o‘zgartirish',
   btn_support: '📞 Qo‘llab-quvvatlash',
+  btn_cancel: '⬅️ Bekor qilish',
 
   // Profile
   profile_title: `👤 *SIZNING PROFILINGIZ*\n━━━━━━━━━━━━━━━━━━━━`,
   profile_name: `Ism:`,
   profile_phone: `Telefon:`,
   profile_address: `Manzil:`,
+  profile_lang: `Til:`,
   profile_not_set: `Ko‘rsatilmagan`,
+  profile_update_prompt: `Telefon raqamingizni yangilash uchun quyidagi tugmani bosing yoki raqamingizni yozib yuboring:`,
   btn_share_contact: `📱 Telefon raqamni yuborish`,
   phone_received: `✅ Telefon raqamingiz muvaffaqiyatli saqlandi!`,
+  action_cancelled: `⬅️ Bekor qilindi. Asosiy menyu:`,
+  invalid_phone: `⚠️ Iltimos, to‘g‘ri telefon raqami yuboring (masalan: +998901234567).`,
 
   // Support
   support_text: `📞 *Mijozlarni qo‘llab-quvvatlash markazi*\n\nSavollaringiz yoki takliflaringiz bo‘lsa, bizning menejerlarimiz sizga yordam berishdan mamnun:\n\n💬 Telegram: @grant_support\n☎️ Telefon: +998 (71) 200-00-00\n⏰ Ish vaqti: 09:00 - 22:00 (har kuni)`,
