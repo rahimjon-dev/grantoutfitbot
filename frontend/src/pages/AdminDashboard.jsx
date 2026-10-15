@@ -188,7 +188,7 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
   });
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 bg-[#0c0d12] text-zinc-100 p-4 sm:p-7 rounded-3xl border border-slate-800 shadow-xl">
       {/* Admin Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
         <div>

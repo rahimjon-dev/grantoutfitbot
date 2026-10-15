@@ -57,7 +57,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a0c] text-zinc-100 font-sans selection:bg-gold-500 selection:text-black">
+    <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-600 selection:text-white">
       {/* Dev / Preview Banner outside Telegram */}
       <DevToolbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -65,11 +65,11 @@ export default function App() {
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main App Content Viewport */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8 mb-16 md:mb-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-6 mb-20 md:mb-8">
         {loading ? (
           <div className="py-24 flex flex-col items-center justify-center space-y-4">
-            <div className="w-10 h-10 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs uppercase tracking-widest text-zinc-400 font-medium">
+            <div className="w-10 h-10 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs uppercase tracking-widest text-slate-500 font-medium">
               Grant Luxury Collection yuklanmoqda...
             </p>
           </div>

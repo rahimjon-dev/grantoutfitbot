@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trash2, ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
+import { X, Trash2, ArrowRight, ShoppingBag, MapPin, CreditCard, Sparkles, ChevronRight } from 'lucide-react';
 import { formatUzs } from '../utils/formatters.js';
 import { useLanguage } from '../context/LanguageContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
@@ -20,65 +20,70 @@ export default function CartDrawer() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs animate-fade-in">
       <div 
         onClick={() => setIsOpen(false)}
         className="absolute inset-0"
       />
 
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-[#121216] border-l border-white/10 flex flex-col shadow-2xl">
-          {/* Header */}
-          <div className="p-4 border-b border-white/[0.08] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShoppingBag size={20} className="text-gold-400" />
-              <h2 className="text-base font-bold text-white tracking-wide uppercase">
-                {t('cart_title')} ({items.length})
-              </h2>
+      <div className="absolute inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
+        <div className="w-screen max-w-md bg-white border-l border-slate-100 flex flex-col shadow-2xl">
+          {/* Header (Image 2 My Cart style) */}
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                <ShoppingBag size={18} />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                  My Cart
+                </h2>
+                <span className="text-[11px] text-slate-400 font-medium">{items.length} items</span>
+              </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
 
           {/* Free Shipping Progress Indicator */}
-          <div className="px-4 py-3 bg-zinc-900/60 border-b border-white/5">
+          <div className="px-5 py-3 bg-slate-50/80 border-b border-slate-100">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="flex items-center gap-1.5 text-zinc-300">
-                <Sparkles size={13} className="text-gold-400" />
+              <span className="flex items-center gap-1.5 text-slate-600">
+                <Sparkles size={13} className="text-blue-600" />
                 {remainingForFree === 0 ? (
-                  <span className="text-emerald-400 font-semibold">Yetkazib berish bepul!</span>
+                  <span className="text-emerald-600 font-bold">Yetkazib berish bepul!</span>
                 ) : (
                   <span>
-                    Yana <strong className="text-white">{formatUzs(remainingForFree)}</strong> bepul yetkazish uchun
+                    Yana <strong className="text-slate-900">{formatUzs(remainingForFree)}</strong> bepul yetkazish uchun
                   </span>
                 )}
               </span>
-              <span className="font-bold text-gold-400">{progressPercent}%</span>
+              <span className="font-bold text-blue-600">{progressPercent}%</span>
             </div>
-            <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-gold-500 h-full rounded-full transition-all duration-500"
+                className="bg-blue-600 h-full rounded-full transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
 
-          {/* Cart Items List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Cart Items List (Image 2 Style) */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
             {items.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
-                <div className="w-16 h-16 rounded-full bg-zinc-800/80 flex items-center justify-center text-zinc-500">
-                  <ShoppingBag size={32} />
+                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                  <ShoppingBag size={30} />
                 </div>
-                <h3 className="text-base font-semibold text-white">{t('cart_empty')}</h3>
-                <p className="text-xs text-zinc-400 max-w-xs">{t('cart_empty_sub')}</p>
+                <h3 className="text-base font-bold text-slate-800">{t('cart_empty')}</h3>
+                <p className="text-xs text-slate-400 max-w-xs">{t('cart_empty_sub')}</p>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="mt-2 px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-white transition-colors"
+                  className="mt-2 px-5 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white transition-colors"
                 >
                   Xarid qilishni boshlash
                 </button>
@@ -93,49 +98,51 @@ export default function CartDrawer() {
                 return (
                   <div
                     key={item.variantId}
-                    className="flex gap-3 bg-zinc-900/60 p-3 rounded-2xl border border-white/[0.06] relative"
+                    className="flex gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-2xs relative"
                   >
                     {/* Thumbnail */}
-                    <img
-                      src={img}
-                      alt={name}
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      className="w-20 h-24 object-cover rounded-xl bg-zinc-950 flex-shrink-0"
-                    />
+                    <div className="w-20 h-22 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <img
+                        src={img}
+                        alt={name}
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
                     {/* Details */}
-                    <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex-1 flex flex-col justify-between pr-6">
                       <div>
-                        <h4 className="text-xs font-semibold text-white line-clamp-1">{name}</h4>
-                        <div className="mt-1 flex flex-wrap gap-1.5">
-                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 font-medium">
-                            {item.variant?.size}
+                        <h4 className="text-xs font-bold text-slate-900 line-clamp-1">{name}</h4>
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold">
+                            {item.variant?.size || 'Standard'}
                           </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 font-medium">
-                            {item.variant?.color_name}
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium">
+                            {item.variant?.color_name || 'Original'}
                           </span>
                         </div>
                       </div>
 
                       {/* Price and Counter Row */}
                       <div className="mt-2 flex items-center justify-between">
-                        <span className="text-xs font-bold text-white">{formatUzs(itemTotal)}</span>
+                        <span className="text-xs font-extrabold text-slate-900">{formatUzs(itemTotal)}</span>
 
                         {/* Stepper */}
-                        <div className="flex items-center bg-zinc-950 rounded-lg p-0.5 border border-zinc-800">
+                        <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200">
                           <button
                             onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                            className="w-6 h-6 rounded bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center text-xs"
+                            className="w-6 h-6 rounded bg-white hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shadow-2xs"
                           >
                             -
                           </button>
-                          <span className="w-7 text-center text-xs font-semibold text-white">
+                          <span className="w-7 text-center text-xs font-bold text-slate-800">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            className="w-6 h-6 rounded bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center text-xs"
+                            className="w-6 h-6 rounded bg-white hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shadow-2xs"
                           >
                             +
                           </button>
@@ -146,7 +153,8 @@ export default function CartDrawer() {
                     {/* Delete Item */}
                     <button
                       onClick={() => removeItem(item.variantId)}
-                      className="absolute top-2.5 right-2.5 text-zinc-500 hover:text-rose-400 transition-colors p-1"
+                      className="absolute top-3 right-3 text-slate-400 hover:text-rose-500 transition-colors p-1"
+                      aria-label="Remove"
                     >
                       <Trash2 size={15} />
                     </button>
@@ -154,37 +162,81 @@ export default function CartDrawer() {
                 );
               })
             )}
+
+            {/* Image 2 Address & Payment Summary Cards */}
+            {items.length > 0 && (
+              <div className="space-y-2.5 pt-2">
+                {/* Shipping Address Card (Image 2 style) */}
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-blue-600">
+                      <MapPin size={16} />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-slate-800">Shipping Address</div>
+                      <div className="text-[10px] text-slate-500 truncate max-w-[160px]">Tashkent, Uzbekistan</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleProceedCheckout}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 px-2.5 py-1 rounded-lg border border-blue-200 bg-white"
+                  >
+                    Change
+                  </button>
+                </div>
+
+                {/* Payment Method Card (Image 2 style) */}
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-emerald-600">
+                      <CreditCard size={16} />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-slate-800">Payment Method</div>
+                      <div className="text-[10px] text-slate-500">Naqd / Karta / Click</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleProceedCheckout}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 px-2.5 py-1 rounded-lg border border-blue-200 bg-white"
+                  >
+                    Change
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Footer Summary */}
+          {/* Footer Summary & Big Blue Confirm Button (Image 2 Style) */}
           {items.length > 0 && (
-            <div className="p-4 border-t border-white/[0.08] bg-zinc-950/90 space-y-3">
+            <div className="p-4 sm:p-5 border-t border-slate-100 bg-white space-y-3 shadow-lg">
               <div className="space-y-1.5 text-xs">
-                <div className="flex justify-between text-zinc-400">
-                  <span>{t('cart_subtotal')}</span>
-                  <span className="text-white font-medium">{formatUzs(subtotal)}</span>
+                <div className="flex justify-between text-slate-500">
+                  <span>Total Price ({items.length} items):</span>
+                  <span className="text-slate-800 font-semibold">{formatUzs(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-zinc-400">
+                <div className="flex justify-between text-slate-500">
                   <span>{t('cart_delivery')}</span>
-                  <span className="text-white font-medium">
+                  <span className="text-slate-800 font-semibold">
                     {deliveryFee === 0 ? (
-                      <span className="text-emerald-400 font-bold">{t('cart_delivery_free')}</span>
+                      <span className="text-emerald-600 font-bold">{t('cart_delivery_free')}</span>
                     ) : (
                       formatUzs(deliveryFee)
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm font-bold pt-2 border-t border-white/[0.08] text-white">
+                <div className="flex justify-between text-base font-bold pt-2 border-t border-slate-100 text-slate-900">
                   <span>{t('cart_total')}</span>
-                  <span className="text-base text-gold-400">{formatUzs(total)}</span>
+                  <span className="text-blue-600 font-extrabold">{formatUzs(total)}</span>
                 </div>
               </div>
 
+              {/* Big Blue CTA (Image 2 Style) */}
               <button
                 onClick={handleProceedCheckout}
-                className="w-full py-3.5 px-4 rounded-xl bg-gold-500 hover:bg-gold-400 text-black font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-gold-500/20 transition-all"
+                className="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-98 transition-all"
               >
-                <span>{t('checkout_btn')}</span>
+                <span>Confirm your purchase</span>
                 <ArrowRight size={16} />
               </button>
             </div>

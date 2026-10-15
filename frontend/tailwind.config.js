@@ -8,6 +8,13 @@ export default {
   theme: {
     extend: {
       colors: {
+        brand: {
+          blue: '#2563eb',
+          'blue-dark': '#1d4ed8',
+          'blue-light': '#eff6ff',
+          black: '#0f172a',
+          gold: '#c5a059'
+        },
         dark: {
           900: '#0a0a0c',
           800: '#121216',

@@ -4,8 +4,8 @@
 
 @layer base {
   body {
-    background-color: #0a0a0c;
-    color: #f4f4f5;
+    background-color: #f8fafc;
+    color: #0f172a;
     font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
@@ -17,45 +17,35 @@
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #121216;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #94a3b8;
 }
 
-/* Luxury Glassmorphism */
-.glass-panel {
-  background: rgba(18, 18, 22, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Modern Card Styles */
+.clean-card {
+  background-color: #ffffff;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
 }
 
-.glass-dropdown {
-  background: rgba(22, 22, 28, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.clean-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.clean-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
-/* Luxury Card Shimmer */
-.luxury-border {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.luxury-border:hover {
-  border-color: rgba(197, 160, 89, 0.4);
-}
-
-/* Gold Gradient Text */
-.gold-gradient-text {
-  background: linear-gradient(135deg, #f5d77f 0%, #c5a059 50%, #9e7d3b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Luxury Editorial & Pill Styles */
+.pill-button {
+  border-radius: 9999px;
+  transition: all 0.2s ease;
 }
 
 /* Safe Area Insets for iOS Telegram */

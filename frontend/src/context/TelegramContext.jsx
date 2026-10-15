@@ -12,10 +12,10 @@ export function TelegramProvider({ children }) {
     return saved
       ? JSON.parse(saved)
       : {
-          id: 999888777,
-          first_name: 'Alex',
-          last_name: 'Tashkent',
-          username: 'alextashkent',
+          id: 7534175269,
+          first_name: 'Rahimjon',
+          last_name: 'Dev',
+          username: 'rahimjon_dev',
           isAdmin: true
         };
   });
@@ -27,8 +27,8 @@ export function TelegramProvider({ children }) {
       try {
         tg.ready();
         tg.expand();
-        tg.setHeaderColor?.('#0a0a0c');
-        tg.setBackgroundColor?.('#0a0a0c');
+        tg.setHeaderColor?.('#ffffff');
+        tg.setBackgroundColor?.('#f8fafc');
         tg.enableClosingConfirmation?.();
       } catch (e) {
         console.warn('Telegram WebApp setup warning:', e);

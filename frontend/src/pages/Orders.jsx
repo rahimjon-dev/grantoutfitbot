@@ -31,18 +31,18 @@ export default function Orders({ onNavigateToCatalog }) {
   return (
     <div className="space-y-6 pb-12">
       {/* Page Title */}
-      <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+      <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight uppercase">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {t('orders_title')}
           </h1>
-          <p className="text-xs text-zinc-400">Buyurtmalaringiz holati va yetkazilish tafsilotlari</p>
+          <p className="text-xs text-slate-500">Buyurtmalaringiz holati va yetkazilish tafsilotlari</p>
         </div>
 
         <button
           onClick={loadOrders}
           disabled={loading}
-          className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-colors"
+          className="p-2 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-600 transition-colors shadow-2xs"
         >
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
         </button>
@@ -50,26 +50,26 @@ export default function Orders({ onNavigateToCatalog }) {
 
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center space-y-3">
-          <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-zinc-400">Buyurtmalar yuklanmoqda...</p>
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-slate-500">Buyurtmalar yuklanmoqda...</p>
         </div>
       ) : error ? (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-xs flex items-center gap-2">
           <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       ) : orders.length === 0 ? (
-        <div className="py-20 text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-500">
+        <div className="py-20 text-center space-y-4 bg-white rounded-3xl border border-slate-100 p-8 shadow-xs">
+          <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto text-slate-400">
             <Package size={32} />
           </div>
-          <h3 className="text-base font-bold text-white">{t('orders_empty')}</h3>
-          <p className="text-xs text-zinc-400 max-w-xs mx-auto">
+          <h3 className="text-base font-bold text-slate-900">{t('orders_empty')}</h3>
+          <p className="text-xs text-slate-500 max-w-xs mx-auto">
             Hozircha sizda faol buyurtmalar yo‘q. Do‘konimizdagi yangi kiyimlarni ko‘zdan kechiring!
           </p>
           <button
             onClick={onNavigateToCatalog}
-            className="px-5 py-2.5 rounded-xl bg-gold-500 hover:bg-gold-400 text-black text-xs font-bold transition-all shadow-lg shadow-gold-500/20"
+            className="px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20"
           >
             Katalogga o‘tish
           </button>
@@ -81,21 +81,21 @@ export default function Orders({ onNavigateToCatalog }) {
             return (
               <div
                 key={order.id}
-                className="bg-[#121216] rounded-2xl border border-white/[0.08] overflow-hidden p-4 sm:p-5 space-y-4 transition-all hover:border-white/20"
+                className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-4 sm:p-5 space-y-4 transition-all hover:shadow-md"
               >
                 {/* Header Row */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold block">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">
                       {t('order_no')}
                     </span>
-                    <span className="font-mono text-sm font-bold text-white">
+                    <span className="font-mono text-sm font-bold text-slate-900">
                       {order.order_number}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-zinc-400 hidden sm:inline">
+                    <span className="text-xs text-slate-500 hidden sm:inline">
                       {formatDate(order.created_at)}
                     </span>
                     <StatusBadge status={order.status} />

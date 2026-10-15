@@ -27,8 +27,8 @@ export default function BottomNav({ activeTab, setActiveTab }) {
   }
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0c0c10]/95 backdrop-blur-xl border-t border-white/[0.08] safe-bottom shadow-[0_-8px_30px_rgba(0,0,0,0.8)]">
-      <div className="flex items-center justify-around h-15 px-0.5 max-w-lg mx-auto">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/80 safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="flex items-center justify-around h-16 px-1 max-w-lg mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -36,28 +36,27 @@ export default function BottomNav({ activeTab, setActiveTab }) {
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
-              className={`flex flex-col items-center justify-center flex-1 py-1.5 px-0.5 relative transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center flex-1 py-1 px-0.5 relative transition-all duration-200 ${
                 isActive
                   ? item.isAdminItem
-                    ? 'text-amber-400 font-bold scale-105'
-                    : 'text-gold-400 font-bold scale-105'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'text-amber-600 font-bold scale-105'
+                    : 'text-blue-600 font-bold scale-105'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              <div className="relative">
-                <Icon size={19} className={isActive ? 'stroke-[2.2]' : 'stroke-[1.8]'} />
-                {item.badge > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-rose-500 text-white text-[8px] font-bold rounded-full min-w-3.5 h-3.5 px-1 flex items-center justify-center shadow-sm">
-                    {item.badge}
-                  </span>
-                )}
+              <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-blue-50' : ''}`}>
+                <div className="relative">
+                  <Icon size={20} className={isActive ? 'stroke-[2.3]' : 'stroke-[1.8]'} />
+                  {item.badge > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-rose-500 text-white text-[8px] font-bold rounded-full min-w-3.5 h-3.5 px-1 flex items-center justify-center shadow-xs">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
               </div>
-              <span className="text-[9px] sm:text-[10px] mt-1 tracking-tight truncate max-w-[58px] leading-tight">
+              <span className={`text-[10px] mt-0.5 tracking-tight truncate max-w-[62px] leading-tight ${isActive ? 'font-bold text-slate-900' : 'font-medium'}`}>
                 {item.label}
               </span>
-              {isActive && (
-                <span className="absolute bottom-0 w-4 h-0.5 bg-gold-400 rounded-full" />
-              )}
             </button>
           );
         })}
