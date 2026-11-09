@@ -15,12 +15,15 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
   const [usersList, setUsersList] = useState([]);
+  const [adminProducts, setAdminProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filters & search
   const [orderFilter, setOrderFilter] = useState('all');
   const [orderSearch, setOrderSearch] = useState('');
   const [userSearch, setUserSearch] = useState('');
+  const [productSearch, setProductSearch] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('all');
 
   // Selected Order for detail & status modal
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -60,14 +63,16 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [statsRes, ordersRes, usersRes] = await Promise.all([
+      const [statsRes, ordersRes, usersRes, prodsRes] = await Promise.all([
         api.getAdminStats(),
         api.getAdminOrders(),
-        api.getAdminUsers()
+        api.getAdminUsers(),
+        api.getProducts({ limit: 100 })
       ]);
       setStats(statsRes.data);
       setOrders(ordersRes.data || []);
       setUsersList(usersRes.data || []);
+      setAdminProducts(prodsRes.data || []);
     } catch (err) {
       console.error('Failed loading admin data:', err);
     } finally {
@@ -106,6 +111,44 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
     }
   };
 
+  // Open Edit Product Modal
+  const handleEditProduct = (product) => {
+    const primaryImg = product.images?.[0]?.image_url || product.image_url || '';
+    const variant = product.variants?.[0] || {};
+    setProductForm({
+      id: product.id,
+      name_en: product.name_en || '',
+      name_uz: product.name_uz || product.name_en || '',
+      name_ru: product.name_ru || product.name_en || '',
+      category_id: product.category_id || categories[0]?.id || '',
+      base_price_uzs: product.base_price_uzs || 250000,
+      discount_price_uzs: product.discount_price_uzs || '',
+      description_uz: product.description_uz || '',
+      description_ru: product.description_ru || '',
+      description_en: product.description_en || '',
+      is_featured: !!product.is_featured,
+      image_url: primaryImg,
+      size: variant.size || 'M',
+      color_name: variant.color_name || 'Onyx Black',
+      stock_quantity: variant.stock_quantity ?? 20
+    });
+    setIsProductModalOpen(true);
+  };
+
+  // Delete Product
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm('Haqiqatan ham ushbu mahsulotni o‘chirmoqchimisiz?')) return;
+    try {
+      await api.deleteProduct(id);
+      setAdminProducts((prev) => prev.filter((p) => p.id !== id));
+      if (onProductsChanged) onProductsChanged();
+      api.getAdminStats().then((res) => setStats(res.data));
+      alert('Mahsulot o‘chirildi!');
+    } catch (err) {
+      alert(err.message || 'Mahsulotni o‘chirishda xatolik yuz berdi');
+    }
+  };
+
   // Save (Create or Update) Product
   const handleSaveProduct = async (e) => {
     e.preventDefault();
@@ -137,6 +180,8 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
 
       await api.saveProduct(payload);
       setIsProductModalOpen(false);
+      api.getProducts({ limit: 100 }).then((res) => setAdminProducts(res.data || []));
+      api.getAdminStats().then((res) => setStats(res.data));
       if (onProductsChanged) onProductsChanged();
       alert('Mahsulot muvaffaqiyatli saqlandi!');
     } catch (err) {
@@ -395,10 +440,13 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
       {/* TAB 3: PRODUCT MANAGEMENT */}
       {activeTab === 'products' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-              Do‘kon Mahsulotlari
-            </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                Do‘kon Mahsulotlari ({adminProducts.length} ta)
+              </h3>
+              <p className="text-[11px] text-zinc-400">Yangi liboslar qo‘shish, tahrirlash va o‘chirish</p>
+            </div>
             <button
               onClick={() => {
                 setProductForm({
@@ -420,23 +468,115 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
                 });
                 setIsProductModalOpen(true);
               }}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold flex items-center gap-1.5 shadow-md"
+              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold flex items-center justify-center gap-1.5 shadow-md transition-all"
             >
               <Plus size={16} />
               <span>Yangi Mahsulot Qo‘shish</span>
             </button>
           </div>
 
-          {/* Product cards list */}
-          <div className="bg-[#121216] rounded-2xl border border-white/[0.08] divide-y divide-white/[0.06]">
-            {categories.map((cat) => (
-              <div key={cat.id} className="p-4 space-y-2">
-                <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                  Bo‘lim: {cat.name_uz}
-                </h4>
-                <p className="text-[11px] text-zinc-400">{cat.description_uz}</p>
-              </div>
-            ))}
+          {/* Search and Category Filter */}
+          <div className="flex flex-col sm:flex-row gap-2.5">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="text"
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                placeholder="Mahsulot nomi bo‘yicha qidirish..."
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white outline-none"
+              />
+            </div>
+            <select
+              value={productCategoryFilter}
+              onChange={(e) => setProductCategoryFilter(e.target.value)}
+              className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white outline-none cursor-pointer"
+            >
+              <option value="all">Barcha bo‘limlar</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id || c.slug}>{c.name_uz || c.name_en}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Products List */}
+          <div className="space-y-2.5">
+            {adminProducts
+              .filter((p) => {
+                const matchCat =
+                  productCategoryFilter === 'all' ||
+                  p.category_id === productCategoryFilter ||
+                  p.category_slug === productCategoryFilter;
+                const matchSearch =
+                  !productSearch.trim() ||
+                  p.name_uz?.toLowerCase().includes(productSearch.toLowerCase()) ||
+                  p.name_en?.toLowerCase().includes(productSearch.toLowerCase()) ||
+                  p.name_ru?.toLowerCase().includes(productSearch.toLowerCase());
+                return matchCat && matchSearch;
+              })
+              .map((prod) => {
+                const img = prod.images?.[0]?.image_url || prod.image_url;
+                const catObj = categories.find((c) => c.id === prod.category_id || c.slug === prod.category_slug);
+
+                return (
+                  <div
+                    key={prod.id}
+                    className="p-3 sm:p-4 bg-[#121216] rounded-2xl border border-white/[0.08] flex items-center justify-between gap-3 hover:border-white/20 transition-all"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {img && (
+                        <img
+                          src={img}
+                          alt={prod.name_en}
+                          className="w-12 h-14 object-cover rounded-xl bg-zinc-900 flex-shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs font-bold text-white truncate max-w-xs">
+                            {prod.name_uz || prod.name_en}
+                          </h4>
+                          {prod.is_featured && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[9px] font-bold">
+                              Featured
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-zinc-400">
+                          Bo‘lim: <span className="text-zinc-300 font-medium">{catObj?.name_uz || 'Kiyim'}</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs font-extrabold text-amber-400">
+                            {formatUzs(prod.discount_price_uzs || prod.base_price_uzs)}
+                          </span>
+                          {prod.discount_price_uzs && (
+                            <span className="text-[10px] text-zinc-500 line-through">
+                              {formatUzs(prod.base_price_uzs)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleEditProduct(prod)}
+                        className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white transition-colors"
+                        title="Tahrirlash"
+                      >
+                        <Edit size={15} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(prod.id)}
+                        className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                        title="O‘chirish"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}
@@ -649,7 +789,9 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-lg bg-[#121216] border border-white/10 rounded-3xl p-6 space-y-4 shadow-2xl">
             <div className="flex justify-between items-center border-b border-white/10 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white">Yangi Libos Qo‘shish</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                {productForm.id ? 'Libosni Tahrirlash' : 'Yangi Libos Qo‘shish'}
+              </h3>
               <button onClick={() => setIsProductModalOpen(false)} className="p-1 text-zinc-400 hover:text-white">
                 <X size={20} />
               </button>
@@ -760,7 +902,7 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
                 type="submit"
                 className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase tracking-wider transition-all"
               >
-                Mahsulotni Saqlash
+                {productForm.id ? 'O‘zgarishlarni Saqlash' : 'Mahsulotni Saqlash'}
               </button>
             </form>
           </div>

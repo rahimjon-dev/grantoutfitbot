@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, MapPin, Globe, Save, CheckCircle2, Shield, Smartphone } from 'lucide-react';
+import { User, Phone, MapPin, Globe, Save, CheckCircle2, Shield, Smartphone, Package, Heart, LayoutDashboard, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.jsx';
 import { useTelegram } from '../context/TelegramContext.jsx';
 import { api } from '../services/api.js';
 
-export default function Profile() {
+export default function Profile({ onNavigateToOrders, onNavigateToFavorites, onNavigateToAdmin }) {
   const { lang, setLang, t } = useLanguage();
   const { user, isAdmin, haptic } = useTelegram();
 
@@ -83,6 +83,65 @@ export default function Profile() {
             {user?.username ? `@${user.username}` : `Telegram ID: ${user?.id || '—'}`}
           </p>
         </div>
+      </div>
+
+      {/* Quick Action Navigation Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={onNavigateToOrders}
+          className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between hover:border-blue-400 hover:shadow-md transition-all text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Package size={20} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">{t('orders_title')}</h4>
+              <p className="text-[11px] text-slate-400">Buyurtmalarim tarixi</p>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-slate-400" />
+        </button>
+
+        <button
+          type="button"
+          onClick={onNavigateToFavorites}
+          className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between hover:border-rose-400 hover:shadow-md transition-all text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <Heart size={20} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">{t('favorites_title')}</h4>
+              <p className="text-[11px] text-slate-400">Yoqqan liboslar</p>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-slate-400" />
+        </button>
+
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={onNavigateToAdmin}
+            className="sm:col-span-2 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 shadow-sm flex items-center justify-between hover:border-amber-400 hover:shadow-md transition-all text-left"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                <LayoutDashboard size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold text-amber-900">Admin Control Center</h4>
+                  <span className="px-1.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[9px] font-extrabold uppercase">Admin</span>
+                </div>
+                <p className="text-[11px] text-amber-700">Buyurtmalar, tovarlar va statistikani boshqarish</p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-amber-700" />
+          </button>
+        )}
       </div>
 
       {/* Profile Edit Form */}

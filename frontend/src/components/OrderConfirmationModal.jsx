@@ -61,6 +61,37 @@ export default function OrderConfirmationModal({ order, onClose, onViewOrders })
           </div>
         </div>
 
+        {/* Online Payment Buttons if payment method is manual_transfer */}
+        {order.payment_method === 'manual_transfer' && (
+          <div className="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 text-left space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-900">Onlayn to‘lov tizimlari:</span>
+              <span className="text-[10px] text-blue-600 font-bold uppercase">Click & Payme</span>
+            </div>
+            <p className="text-[11px] text-slate-600">
+              Buyurtmangizni tezroq tasdiqlash uchun to‘lovni quyidagi havolalar orqali amalga oshirishingiz mumkin:
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={`https://my.click.uz/services/pay?service_id=0000&merchant_id=0000&amount=${order.total_amount_uzs}&transaction_param=${order.order_number}`}
+                target="_blank"
+                rel="noreferrer"
+                className="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs text-center shadow-xs transition-all"
+              >
+                🔵 Click Pay
+              </a>
+              <a
+                href={`https://checkout.paycom.uz/${btoa(`m=0000;ac.order_id=${order.order_number};a=${order.total_amount_uzs * 100}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center shadow-xs transition-all"
+              >
+                🟢 Payme
+              </a>
+            </div>
+          </div>
+        )}
+
         <p className="text-[11px] text-slate-400">
           For more details, track your delivery status under <strong>My Profile &gt; My Orders</strong>
         </p>

@@ -109,7 +109,11 @@ export default function App() {
             )}
 
             {activeTab === 'profile' && (
-              <Profile />
+              <Profile
+                onNavigateToOrders={() => setActiveTab('orders')}
+                onNavigateToFavorites={() => setActiveTab('favorites')}
+                onNavigateToAdmin={() => setActiveTab('admin')}
+              />
             )}
 
             {activeTab === 'admin' && (

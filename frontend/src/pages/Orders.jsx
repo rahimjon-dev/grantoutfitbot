@@ -105,26 +105,26 @@ export default function Orders({ onNavigateToCatalog }) {
                 {/* Items List */}
                 <div className="space-y-2.5">
                   {items.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-3 bg-zinc-950/60 p-2.5 rounded-xl border border-white/5">
+                    <div key={idx} className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                       {item.product_image_url && (
                         <img
                           src={item.product_image_url}
                           alt={item.product_name}
                           loading="lazy"
                           referrerPolicy="no-referrer"
-                          className="w-12 h-14 object-cover rounded-lg bg-zinc-900 flex-shrink-0"
+                          className="w-12 h-14 object-cover rounded-lg bg-slate-200 flex-shrink-0"
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-semibold text-white truncate">
+                        <h4 className="text-xs font-bold text-slate-900 truncate">
                           {item.product_name}
                         </h4>
-                        <p className="text-[11px] text-zinc-400">
+                        <p className="text-[11px] text-slate-500">
                           {item.selected_size} • {item.selected_color} • {item.quantity} dona
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-bold text-white">
+                        <span className="text-xs font-bold text-slate-900">
                           {formatUzs(item.total_price_uzs)}
                         </span>
                       </div>
@@ -134,15 +134,15 @@ export default function Orders({ onNavigateToCatalog }) {
 
                 {/* Tracking & Dispatch Notes (If Provided by Admin) */}
                 {(order.tracking_number || order.dispatch_notes) && (
-                  <div className="p-3 rounded-xl bg-gold-500/10 border border-gold-500/20 text-xs space-y-1">
+                  <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 text-xs space-y-1">
                     {order.tracking_number && (
-                      <div className="flex items-center gap-1.5 text-gold-300">
+                      <div className="flex items-center gap-1.5 text-blue-700 font-medium">
                         <Truck size={14} />
-                        <span>Kuryer trek-kodi: <strong className="font-mono text-white">{order.tracking_number}</strong></span>
+                        <span>Kuryer trek-kodi: <strong className="font-mono text-slate-900">{order.tracking_number}</strong></span>
                       </div>
                     )}
                     {order.dispatch_notes && (
-                      <p className="text-zinc-300 italic">
+                      <p className="text-slate-600 italic">
                         "{order.dispatch_notes}"
                       </p>
                     )}
@@ -150,17 +150,30 @@ export default function Orders({ onNavigateToCatalog }) {
                 )}
 
                 {/* Footer Details */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/[0.06] text-xs">
-                  <div className="flex items-center gap-1.5 text-zinc-400">
-                    <MapPin size={13} className="text-zinc-500 flex-shrink-0" />
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-500">
+                    <MapPin size={13} className="text-slate-400 flex-shrink-0" />
                     <span className="truncate max-w-xs">{order.delivery_address} ({order.delivery_city})</span>
                   </div>
 
-                  <div className="text-right">
-                    <span className="text-zinc-400 mr-2">Jami to‘lov:</span>
-                    <span className="text-sm font-extrabold text-gold-400">
-                      {formatUzs(order.total_amount_uzs)}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className="text-slate-500 mr-2">Jami to‘lov:</span>
+                      <span className="text-sm font-extrabold text-blue-600">
+                        {formatUzs(order.total_amount_uzs)}
+                      </span>
+                    </div>
+
+                    {order.payment_method === 'manual_transfer' && order.status === 'pending' && (
+                      <a
+                        href={`https://my.click.uz/services/pay?service_id=0000&merchant_id=0000&amount=${order.total_amount_uzs}&transaction_param=${order.order_number}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shadow-sm transition-all"
+                      >
+                        Click orqali to‘lash
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
