@@ -7,7 +7,7 @@ import { useTelegram } from '../context/TelegramContext.jsx';
 import { api } from '../services/api.js';
 
 export default function CheckoutModal({ onOrderSuccess }) {
-  const { isCheckoutOpen, setIsCheckoutOpen, items, subtotal, deliveryFee, total, clearCart } = useCart();
+  const { isCheckoutOpen, setIsCheckoutOpen, items, subtotal, deliveryFee, total, clearCart, isStockValid } = useCart();
   const { t, getLocalizedField } = useLanguage();
   const { user, isInsideTelegram, tg, haptic } = useTelegram();
 
@@ -84,12 +84,17 @@ export default function CheckoutModal({ onOrderSuccess }) {
       setErrorMessage('Iltimos, ismingizni kiriting');
       return;
     }
-    if (!phoneNumber.trim()) {
-      setErrorMessage('Iltimos, telefon raqamingizni kiriting');
+    if (!phoneNumber.trim() || phoneNumber.trim().length < 9) {
+      setErrorMessage('Iltimos, to‘liq va to‘g‘ri telefon raqamingizni kiriting');
       return;
     }
     if (!finalAddress.trim()) {
       setErrorMessage('Iltimos, yetkazish manzilini kiriting');
+      return;
+    }
+
+    if (!isStockValid) {
+      setErrorMessage('Savatchangizdagi ayrim mahsulotlar omborda yetarli emas. Iltimos, savatchani tekshiring.');
       return;
     }
 

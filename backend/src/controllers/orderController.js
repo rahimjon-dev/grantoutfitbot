@@ -68,25 +68,49 @@ export const orderController = {
       const telegramId = req.telegramUser.id;
       const { customerName, phoneNumber, deliveryAddress, deliveryCity, deliveryNotes, paymentMethod, items } = req.body;
 
-      if (!customerName || !phoneNumber || !deliveryAddress) {
+      // 1. Validate customer name
+      if (!customerName || typeof customerName !== 'string' || customerName.trim().length < 2) {
         return res.status(400).json({
           success: false,
           error: 'VALIDATION_ERROR',
-          message: 'Ism, telefon raqam va yetkazish manzili kiritilishi shart'
+          message: 'Ism kamida 2 ta harfdan iborat bo‘lishi shart'
         });
       }
 
-      let orderItems = items;
-      if (!orderItems || !orderItems.length) {
+      // 2. Validate phone number
+      const cleanPhone = (phoneNumber || '').trim();
+      if (!cleanPhone || !/^\+?[0-9\s\-()]{9,20}$/.test(cleanPhone)) {
+        return res.status(400).json({
+          success: false,
+          error: 'VALIDATION_ERROR',
+          message: 'To‘g‘ri telefon raqam kiritilishi shart (masalan: +998 90 123 45 67)'
+        });
+      }
+
+      // 3. Validate delivery address
+      if (!deliveryAddress || typeof deliveryAddress !== 'string' || deliveryAddress.trim().length < 3) {
+        return res.status(400).json({
+          success: false,
+          error: 'VALIDATION_ERROR',
+          message: 'Yetkazib berish manzili kiritilishi shart'
+        });
+      }
+
+      // 4. Validate payment method
+      const allowedPaymentMethods = ['cash_on_delivery', 'manual_transfer', 'card_on_delivery'];
+      const validatedPaymentMethod = allowedPaymentMethods.includes(paymentMethod) ? paymentMethod : 'cash_on_delivery';
+
+      let rawItems = items;
+      if (!rawItems || !rawItems.length) {
         const cartItems = await db.getUserCart(telegramId);
-        orderItems = cartItems.map(c => ({
+        rawItems = cartItems.map(c => ({
           variantId: c.variant_id,
           productId: c.product_id,
           quantity: c.quantity
         }));
       }
 
-      if (!orderItems || !orderItems.length) {
+      if (!rawItems || !rawItems.length) {
         return res.status(400).json({
           success: false,
           error: 'CART_EMPTY',
@@ -94,15 +118,51 @@ export const orderController = {
         });
       }
 
-      // Execute atomic order placement & stock deduction
+      // 5. Consolidate & validate items (recalculate price strictly on backend, eliminate duplicates)
+      const consolidatedMap = new Map();
+      for (const item of rawItems) {
+        const variantId = item.variantId || item.variant_id;
+        const productId = item.productId || item.product_id;
+        const qty = parseInt(item.quantity || '1', 10);
+
+        if (!variantId || isNaN(qty) || qty <= 0) {
+          return res.status(400).json({
+            success: false,
+            error: 'INVALID_ITEM',
+            message: 'Har bir mahsulot varianti va to‘g‘ri miqdor ko‘rsatilishi shart'
+          });
+        }
+
+        if (qty > 50) {
+          return res.status(400).json({
+            success: false,
+            error: 'QUANTITY_LIMIT_EXCEEDED',
+            message: 'Bitta variantdan maksimal 50 dona buyurtma berish mumkin'
+          });
+        }
+
+        if (consolidatedMap.has(variantId)) {
+          consolidatedMap.get(variantId).quantity += qty;
+        } else {
+          consolidatedMap.set(variantId, {
+            variant_id: variantId,
+            product_id: productId,
+            quantity: qty
+          });
+        }
+      }
+
+      const orderItems = Array.from(consolidatedMap.values());
+
+      // 6. Execute atomic order placement & stock deduction
       const orderResult = await db.createOrder({
         telegramId,
         customerName: customerName.trim(),
-        phoneNumber: phoneNumber.trim(),
+        phoneNumber: cleanPhone,
         deliveryAddress: deliveryAddress.trim(),
-        deliveryCity: deliveryCity?.trim() || 'Tashkent',
-        deliveryNotes: deliveryNotes?.trim() || null,
-        paymentMethod: paymentMethod || 'cash_on_delivery',
+        deliveryCity: (deliveryCity || 'Tashkent').trim(),
+        deliveryNotes: deliveryNotes ? deliveryNotes.trim() : null,
+        paymentMethod: validatedPaymentMethod,
         items: orderItems
       });
 

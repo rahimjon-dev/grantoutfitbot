@@ -52,6 +52,18 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
     stock_quantity: 20
   });
 
+  // Category Modal State
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [categoryForm, setCategoryForm] = useState({
+    id: '',
+    slug: '',
+    name_uz: '',
+    name_ru: '',
+    name_en: '',
+    description_uz: '',
+    image_url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80'
+  });
+
   // Broadcast campaign state
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [broadcastImage, setBroadcastImage] = useState('');
@@ -189,6 +201,58 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
     }
   };
 
+  // Category Actions
+  const handleAddNewCategory = () => {
+    setCategoryForm({
+      id: '',
+      slug: '',
+      name_uz: '',
+      name_ru: '',
+      name_en: '',
+      description_uz: '',
+      image_url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80'
+    });
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleEditCategory = (cat) => {
+    setCategoryForm({
+      id: cat.id,
+      slug: cat.slug || '',
+      name_uz: cat.name_uz || '',
+      name_ru: cat.name_ru || '',
+      name_en: cat.name_en || '',
+      description_uz: cat.description_uz || '',
+      image_url: cat.image_url || 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80'
+    });
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleDeleteCategory = async (catId) => {
+    if (!window.confirm('Haqiqatan ham bu bo‘limni o‘chirmoqchimisiz? Unga tegishli mahsulotlar saqlanadi.')) return;
+    try {
+      await api.deleteCategory(catId);
+      if (onProductsChanged) onProductsChanged();
+      loadDashboardData();
+      alert('Bo‘lim muvaffaqiyatli o‘chirildi!');
+    } catch (err) {
+      alert(err.message || 'Bo‘limni o‘chirishda xatolik');
+    }
+  };
+
+  const handleSaveCategory = async (e) => {
+    e.preventDefault();
+    try {
+      await api.saveCategory(categoryForm);
+      setIsCategoryModalOpen(false);
+      if (onProductsChanged) onProductsChanged();
+      loadDashboardData();
+      alert('Bo‘lim muvaffaqiyatli saqlandi!');
+    } catch (err) {
+      alert(err.message || 'Bo‘limni saqlashda xatolik');
+    }
+  };
+
   // Send Broadcast
   const handleSendBroadcast = async (e) => {
     e.preventDefault();
@@ -251,6 +315,7 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
             { id: 'overview', label: 'Umumiy' },
             { id: 'orders', label: 'Buyurtmalar' },
             { id: 'products', label: 'Mahsulotlar' },
+            { id: 'categories', label: 'Bo‘limlar' },
             { id: 'users', label: 'Mijozlar' },
             { id: 'broadcast', label: 'Xabarnoma' }
           ].map((tab) => (
@@ -319,7 +384,29 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
               <h3 className="text-lg sm:text-2xl font-extrabold text-white">
                 {stats?.availableProducts || 0}
               </h3>
-              <p className="text-[11px] text-zinc-400 font-medium">6 ta kategoriya bo‘yicha</p>
+              <p className="text-[11px] text-zinc-400 font-medium">
+                {categories?.length || stats?.totalCategories || 0} ta bo‘lim bo‘yicha
+              </p>
+            </div>
+          </div>
+
+          {/* Order Status Breakdown */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="p-3.5 bg-zinc-900/70 border border-amber-500/20 rounded-2xl">
+              <span className="text-[11px] text-zinc-400 block mb-1">Kutilmoqda</span>
+              <span className="text-lg font-bold text-amber-400">{stats?.pendingOrders || 0}</span>
+            </div>
+            <div className="p-3.5 bg-zinc-900/70 border border-blue-500/20 rounded-2xl">
+              <span className="text-[11px] text-zinc-400 block mb-1">Yetkazilmoqda</span>
+              <span className="text-lg font-bold text-blue-400">{stats?.shippedOrders || 0}</span>
+            </div>
+            <div className="p-3.5 bg-zinc-900/70 border border-emerald-500/20 rounded-2xl">
+              <span className="text-[11px] text-zinc-400 block mb-1">Yetkazilgan</span>
+              <span className="text-lg font-bold text-emerald-400">{stats?.deliveredOrders || 0}</span>
+            </div>
+            <div className="p-3.5 bg-zinc-900/70 border border-rose-500/20 rounded-2xl">
+              <span className="text-[11px] text-zinc-400 block mb-1">Bekor qilingan</span>
+              <span className="text-lg font-bold text-rose-400">{stats?.cancelledOrders || 0}</span>
             </div>
           </div>
 
@@ -577,6 +664,80 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
                   </div>
                 );
               })}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: CATEGORY MANAGEMENT */}
+      {activeTab === 'categories' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                Bo‘limlar va Kategoriyalar
+              </h3>
+              <p className="text-xs text-zinc-400">Jami {categories?.length || 0} ta faol kategoriya</p>
+            </div>
+            <button
+              onClick={handleAddNewCategory}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all shadow-md"
+            >
+              <Plus size={16} />
+              <span>Yangi Bo‘lim Qo‘shish</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {(categories || []).map((cat) => (
+              <div
+                key={cat.id}
+                className="p-4 bg-[#121216] rounded-2xl border border-white/[0.08] flex flex-col justify-between gap-3 hover:border-white/20 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  {cat.image_url && (
+                    <img
+                      src={cat.image_url}
+                      alt={cat.name_uz}
+                      className="w-14 h-14 object-cover rounded-xl bg-zinc-900 flex-shrink-0"
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-bold text-white truncate">
+                      {cat.name_uz}
+                    </h4>
+                    <p className="text-[11px] text-zinc-400 truncate">
+                      EN: {cat.name_en || '—'} | RU: {cat.name_ru || '—'}
+                    </p>
+                    <p className="text-[10px] text-zinc-500 font-mono mt-0.5">
+                      Slug: {cat.slug}
+                    </p>
+                  </div>
+                </div>
+
+                {cat.description_uz && (
+                  <p className="text-xs text-zinc-400 line-clamp-2">
+                    {cat.description_uz}
+                  </p>
+                )}
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
+                  <button
+                    onClick={() => handleEditCategory(cat)}
+                    className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white transition-colors"
+                    title="Tahrirlash"
+                  >
+                    <Edit size={15} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCategory(cat.id)}
+                    className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                    title="O‘chirish"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -903,6 +1064,99 @@ export default function AdminDashboard({ categories, onProductsChanged }) {
                 className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase tracking-wider transition-all"
               >
                 {productForm.id ? 'O‘zgarishlarni Saqlash' : 'Mahsulotni Saqlash'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE / EDIT CATEGORY MODAL */}
+      {isCategoryModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#121216] border border-white/10 rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                {categoryForm.id ? 'Bo‘limni Tahrirlash' : 'Yangi Bo‘lim Qo‘shish'}
+              </h3>
+              <button onClick={() => setIsCategoryModalOpen(false)} className="p-1 text-zinc-400 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCategory} className="space-y-3 text-xs">
+              <div>
+                <label className="text-zinc-400 block mb-1">Bo‘lim nomi (O‘zbekcha) *</label>
+                <input
+                  type="text"
+                  required
+                  value={categoryForm.name_uz}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, name_uz: e.target.value })}
+                  placeholder="Masalan: Kurtkalar"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-zinc-400 block mb-1">Bo‘lim nomi (English) *</label>
+                <input
+                  type="text"
+                  required
+                  value={categoryForm.name_en}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, name_en: e.target.value })}
+                  placeholder="e.g. Jackets"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-zinc-400 block mb-1">Bo‘lim nomi (Русский)</label>
+                <input
+                  type="text"
+                  value={categoryForm.name_ru}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, name_ru: e.target.value })}
+                  placeholder="Например: Куртки"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-zinc-400 block mb-1">Slug (identifikator)</label>
+                <input
+                  type="text"
+                  value={categoryForm.slug}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
+                  placeholder="jackets (avtomatik yaratiladi)"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-zinc-400 block mb-1">Rasm havolasi (URL)</label>
+                <input
+                  type="url"
+                  value={categoryForm.image_url}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, image_url: e.target.value })}
+                  placeholder="https://images.unsplash.com/photo-..."
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-zinc-400 block mb-1">Qisqacha tavsif (ixtiyoriy)</label>
+                <textarea
+                  rows={2}
+                  value={categoryForm.description_uz}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, description_uz: e.target.value })}
+                  placeholder="Premium kurtkalar va palto to‘plami"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase tracking-wider transition-all"
+              >
+                {categoryForm.id ? 'O‘zgarishlarni Saqlash' : 'Bo‘limni Saqlash'}
               </button>
             </form>
           </div>

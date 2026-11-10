@@ -10,15 +10,15 @@ export function getAuthHeaders() {
 
   if (initData) {
     headers['x-telegram-init-data'] = initData;
-  } else {
-    // In dev / outside telegram simulation
+  } else if (import.meta.env.DEV) {
+    // Only in local development mode outside Telegram
     const mockUser = localStorage.getItem('grant_dev_user');
     if (mockUser) {
       try {
         const parsed = JSON.parse(mockUser);
-        headers['x-mock-telegram-id'] = parsed.id;
-        headers['x-mock-first-name'] = parsed.first_name;
-        headers['x-mock-last-name'] = parsed.last_name;
+        if (parsed.id) headers['x-mock-telegram-id'] = String(parsed.id);
+        if (parsed.first_name) headers['x-mock-first-name'] = parsed.first_name;
+        if (parsed.last_name) headers['x-mock-last-name'] = parsed.last_name;
         if (parsed.isAdmin) {
           headers['x-dev-admin'] = 'true';
         }
@@ -26,7 +26,8 @@ export function getAuthHeaders() {
     }
   }
 
-  const adminToken = localStorage.getItem('grant_admin_token') || 'grant_secret_key_2026';
+  // Only send x-admin-key if explicitly stored by an authenticated admin
+  const adminToken = localStorage.getItem('grant_admin_token') || sessionStorage.getItem('grant_admin_token');
   if (adminToken) {
     headers['x-admin-key'] = adminToken;
   }
@@ -118,6 +119,15 @@ export const api = {
     request(`/admin/products/${id}`, {
       method: 'DELETE'
     }),
+  saveCategory: (categoryData) =>
+    request('/admin/categories', {
+      method: 'POST',
+      body: JSON.stringify(categoryData)
+    }),
+  deleteCategory: (id) =>
+    request(`/admin/categories/${id}`, {
+      method: 'DELETE'
+    }),
   getAdminUsers: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return request(`/admin/users${query ? `?${query}` : ''}`);
@@ -126,5 +136,13 @@ export const api = {
     request('/admin/broadcast', {
       method: 'POST',
       body: JSON.stringify(broadcastData)
-    })
+    }),
+  setAdminToken: (token) => {
+    if (token) {
+      localStorage.setItem('grant_admin_token', token);
+    } else {
+      localStorage.removeItem('grant_admin_token');
+    }
+  },
+  getAdminToken: () => localStorage.getItem('grant_admin_token')
 };

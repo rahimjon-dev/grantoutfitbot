@@ -11,6 +11,8 @@ router.get('/orders', adminController.getOrders);
 router.put('/orders/:id/status', adminController.updateOrderStatus);
 router.post('/products', adminController.saveProduct);
 router.delete('/products/:id', adminController.deleteProduct);
+router.post('/categories', adminController.saveCategory);
+router.delete('/categories/:id', adminController.deleteCategory);
 router.get('/users', adminController.getUsers);
 router.post('/broadcast', adminController.sendBroadcast);
 

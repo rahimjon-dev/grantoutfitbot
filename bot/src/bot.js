@@ -56,9 +56,11 @@ bot.hears([/Qo‘llab-quvvatlash/i, /Поддержка/i, /Contact Support/i], 
 // Global Error Handler
 bot.catch((err) => {
   const ctx = err.ctx;
-  console.error(`Error while handling update ${ctx.update.update_id}:`);
+  console.error(`[Bot Error] update_id: ${ctx?.update?.update_id || 'unknown'}:`, err.message || err);
   const e = err.error;
-  console.error(e);
+  if (e?.error_code === 409) {
+    console.warn('⚠️ Another bot instance is currently active (Telegram 409 Conflict). Polling paused.');
+  }
 });
 
 // Launch bot if token is present
@@ -72,6 +74,14 @@ if (config.botToken && config.botToken !== 'dummy_token') {
       console.log(`===============================================`);
     }
   });
+
+  // Graceful shutdown handling
+  const stopBot = () => {
+    console.log('Stopping Telegram bot gracefully...');
+    bot.stop();
+  };
+  process.once('SIGINT', stopBot);
+  process.once('SIGTERM', stopBot);
 } else {
   console.log('🤖 Bot initialized in dev standby mode. Add TELEGRAM_BOT_TOKEN in .env to connect to Telegram live.');
 }

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { api } from '../services/api.js';
 
 const TelegramContext = createContext(null);
 
@@ -6,8 +7,9 @@ export function TelegramProvider({ children }) {
   const tg = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
   const isInsideTelegram = Boolean(tg && tg.initData);
 
-  // Dev simulation user when opened outside Telegram
+  // Dev simulation user when opened outside Telegram in development mode
   const [devUser, setDevUser] = useState(() => {
+    if (!import.meta.env.DEV) return null;
     const saved = localStorage.getItem('grant_dev_user');
     return saved
       ? JSON.parse(saved)
@@ -16,10 +18,11 @@ export function TelegramProvider({ children }) {
           first_name: 'Rahimjon',
           last_name: 'Dev',
           username: 'rahimjon_dev',
-          isAdmin: true
+          isAdmin: false
         };
   });
 
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -37,6 +40,27 @@ export function TelegramProvider({ children }) {
     setIsReady(true);
   }, [tg]);
 
+  const user = isInsideTelegram ? tg?.initDataUnsafe?.user : devUser;
+
+  // Verify server-side authorization and profile
+  useEffect(() => {
+    if (!user) return;
+    api.getProfile()
+      .then((res) => {
+        if (res?.data) {
+          setIsAdmin(Boolean(res.data.is_admin));
+        }
+      })
+      .catch((err) => {
+        // In local development, if server is not yet running or mock header is set
+        if (!isInsideTelegram && import.meta.env.DEV && devUser?.isAdmin) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      });
+  }, [user?.id, isInsideTelegram]);
+
   const haptic = (type = 'medium') => {
     if (tg?.HapticFeedback) {
       if (type === 'success' || type === 'error' || type === 'warning') {
@@ -48,25 +72,25 @@ export function TelegramProvider({ children }) {
   };
 
   const updateDevUser = (updates) => {
+    if (!import.meta.env.DEV) return;
     const next = { ...devUser, ...updates };
     setDevUser(next);
     localStorage.setItem('grant_dev_user', JSON.stringify(next));
+    if (updates.isAdmin !== undefined) {
+      setIsAdmin(Boolean(updates.isAdmin));
+    }
   };
-
-  const user = isInsideTelegram ? tg?.initDataUnsafe?.user : devUser;
-  const isAdmin = isInsideTelegram
-    ? Boolean(user?.id && (user.id === 123456789 || user.id === 987654321 || devUser.isAdmin))
-    : Boolean(devUser.isAdmin);
 
   const value = {
     tg,
     isInsideTelegram,
     user,
     isAdmin,
+    setIsAdmin,
     isReady,
     haptic,
     updateDevUser,
-    colorScheme: tg?.colorScheme || 'dark',
+    colorScheme: tg?.colorScheme || 'light',
     themeParams: tg?.themeParams || {}
   };
 

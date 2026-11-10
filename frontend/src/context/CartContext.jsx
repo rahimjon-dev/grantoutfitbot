@@ -22,15 +22,40 @@ export function CartProvider({ children }) {
     localStorage.setItem('grant_cart_items', JSON.stringify(items));
   }, [items]);
 
+  // Sync cart with backend on mount
+  useEffect(() => {
+    api.getCart()
+      .then((res) => {
+        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+          const remoteItems = res.data.map((item) => ({
+            variantId: item.variant_id,
+            productId: item.product_id,
+            product: item.product,
+            variant: item.variant,
+            quantity: item.quantity
+          }));
+          setItems(remoteItems);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const addToCart = (product, variant, quantity = 1) => {
     haptic('medium');
+    const availableStock = variant?.stock_quantity ?? 99;
+    if (availableStock <= 0) {
+      alert('Kechirasiz, ushbu o‘lcham yoki rangdagi mahsulot hozirda tugagan.');
+      return;
+    }
+
     setItems((prev) => {
       const existingIndex = prev.findIndex((i) => i.variantId === variant.id);
       if (existingIndex > -1) {
         const next = [...prev];
+        const nextQty = Math.min(next[existingIndex].quantity + quantity, availableStock);
         next[existingIndex] = {
           ...next[existingIndex],
-          quantity: next[existingIndex].quantity + quantity
+          quantity: nextQty
         };
         return next;
       }
@@ -41,12 +66,12 @@ export function CartProvider({ children }) {
           productId: product.id,
           product,
           variant,
-          quantity
+          quantity: Math.min(quantity, availableStock)
         }
       ];
     });
 
-    // Sync to backend asynchronously
+    // Sync to backend
     api.addToCart(product.id, variant.id, quantity).catch(() => {});
   };
 
@@ -56,8 +81,16 @@ export function CartProvider({ children }) {
       removeItem(variantId);
       return;
     }
+
     setItems((prev) =>
-      prev.map((item) => (item.variantId === variantId ? { ...item, quantity } : item))
+      prev.map((item) => {
+        if (item.variantId === variantId) {
+          const maxStock = item.variant?.stock_quantity ?? 99;
+          const cappedQty = Math.min(quantity, maxStock);
+          return { ...item, quantity: cappedQty };
+        }
+        return item;
+      })
     );
     api.updateCartItem(variantId, quantity).catch(() => {});
   };
@@ -83,6 +116,12 @@ export function CartProvider({ children }) {
   const deliveryFee = subtotal >= 500000 || subtotal === 0 ? 0 : 30000;
   const total = subtotal + deliveryFee;
 
+  // Stock check helper
+  const isStockValid = items.every((i) => {
+    const stock = i.variant?.stock_quantity;
+    return stock === undefined || stock >= i.quantity;
+  });
+
   const value = {
     items,
     isOpen,
@@ -96,7 +135,8 @@ export function CartProvider({ children }) {
     itemCount,
     subtotal,
     deliveryFee,
-    total
+    total,
+    isStockValid
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

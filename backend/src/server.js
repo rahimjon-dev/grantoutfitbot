@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { config } from './config/index.js';
+import { db } from './services/supabase.js';
 
 import path from 'path';
 import fs from 'fs';
@@ -46,13 +47,16 @@ const generalLimiter = rateLimit({
 });
 app.use(generalLimiter);
 
-// Health Check Endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'online',
+// Health Check Endpoint with Database Connectivity Verification
+app.get('/api/health', async (req, res) => {
+  const dbHealth = await db.checkHealth();
+  const isHealthy = dbHealth.status === 'connected' || (config.nodeEnv === 'development' && dbHealth.status === 'offline');
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'healthy' : 'degraded',
+    database: dbHealth,
     timestamp: new Date().toISOString(),
     environment: config.nodeEnv,
-    botConfigured: !!config.botToken,
+    botConfigured: Boolean(config.botToken),
     adminCount: config.adminIds.length
   });
 });
@@ -87,13 +91,24 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`===============================================`);
   console.log(`🚀 Grant Outfitbot Backend running on port ${config.port}`);
   console.log(`📍 Environment: ${config.nodeEnv}`);
   console.log(`🤖 Telegram Bot Token: ${config.botToken ? 'Configured ✅' : 'Not set (Dev mode mock)'}`);
   console.log(`👑 Admin IDs: [${config.adminIds.join(', ')}]`);
   console.log(`===============================================`);
+});
+
+// Graceful shutdown handling
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => process.exit(0));
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  server.close(() => process.exit(0));
 });
 
 export default app;

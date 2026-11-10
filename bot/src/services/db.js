@@ -11,6 +11,10 @@ if (config.supabase.url && config.supabase.serviceRoleKey) {
   }
 }
 
+function isUUID(str) {
+  return typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+}
+
 // In-memory fallback for bot
 const usersStore = new Map();
 const ordersStore = [];
@@ -23,7 +27,7 @@ export const botDb = {
         .from('users')
         .select('*')
         .eq('telegram_id', tid)
-        .single();
+        .maybeSingle();
       if (!error && data) return data;
     }
     return usersStore.get(tid) || null;
@@ -116,21 +120,38 @@ export const botDb = {
   async updateOrderStatus(orderId, status, adminId) {
     if (supabase) {
       try {
-        const { data: updated } = await supabase
-          .from('orders')
-          .update({ status, updated_at: new Date().toISOString() })
-          .eq('id', orderId)
-          .select()
-          .single();
+        let orderRecord = null;
+        if (isUUID(orderId)) {
+          const { data } = await supabase.from('orders').select('*').eq('id', orderId).maybeSingle();
+          orderRecord = data;
+        } else {
+          const { data } = await supabase.from('orders').select('*').eq('order_number', orderId).maybeSingle();
+          orderRecord = data;
+        }
 
-        await supabase.from('order_status_history').insert({
-          order_id: orderId,
-          new_status: status,
-          changed_by: `admin:${adminId}`,
-          notes: `Updated via Telegram inline button by Admin ${adminId}`
-        });
+        if (orderRecord) {
+          if (status === 'cancelled') {
+            await supabase.rpc('cancel_order_atomic', {
+              p_order_id: orderRecord.id,
+              p_changed_by: `admin:${adminId}`,
+              p_reason: `Cancelled via Telegram bot by Admin ${adminId}`
+            });
+          } else {
+            await supabase
+              .from('orders')
+              .update({ status, updated_at: new Date().toISOString() })
+              .eq('id', orderRecord.id);
 
-        return updated;
+            await supabase.from('order_status_history').insert({
+              order_id: orderRecord.id,
+              previous_status: orderRecord.status,
+              new_status: status,
+              changed_by: `admin:${adminId}`,
+              notes: `Updated via Telegram inline button by Admin ${adminId}`
+            });
+          }
+          return { ...orderRecord, status };
+        }
       } catch (err) {
         console.warn('Supabase updateOrderStatus error:', err.message);
       }

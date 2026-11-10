@@ -1,6 +1,9 @@
 # Environment variables (NEVER COMMIT SECRETS)
 .env
-.env.local
+.env.*
+!.env.example
+!*/.env.example
+*.env
 backend/.env
 bot/.env
 frontend/.env

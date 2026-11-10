@@ -18,8 +18,9 @@ export const config = {
     .map(id => id.trim())
     .filter(Boolean)
     .map(id => Number(id)),
-  adminSecretKey: process.env.ADMIN_SECRET_KEY || 'grant_secret_key_2026',
-  jwtSecret: process.env.JWT_SECRET || 'grant_jwt_secret_token_outfit_2026',
+  adminSecretKey: process.env.ADMIN_SECRET_KEY || '',
+  jwtSecret: process.env.JWT_SECRET || '',
+  allowDevAdmin: process.env.ALLOW_DEV_ADMIN === 'true',
   supabase: {
     url: process.env.SUPABASE_URL || '',
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',

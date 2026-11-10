@@ -45,11 +45,11 @@ export function verifyTelegramInitData(initDataRaw, botToken) {
     const isValid = crypto.timingSafeEqual(calculatedBuffer, receivedBuffer);
     if (!isValid) return null;
 
-    // Check auth_date freshness (allow up to 86400 seconds = 24 hours)
+    // Check auth_date freshness (enforce 24 hours = 86400 seconds)
     const authDate = parseInt(urlParams.get('auth_date') || '0', 10);
     const now = Math.floor(Date.now() / 1000);
-    if (now - authDate > 86400 * 7) {
-      // 7 days window for mini app caching
+    const maxAgeSeconds = config.nodeEnv === 'production' ? 86400 : 86400 * 7;
+    if (now - authDate > maxAgeSeconds) {
       return null;
     }
 
@@ -76,10 +76,11 @@ export function telegramAuthMiddleware(req, res, next) {
   const initDataHeader = req.headers['x-telegram-init-data'];
   const initData = initDataHeader || (authHeader?.startsWith('tma ') ? authHeader.slice(4) : null);
 
-  // In development mode, allow mock user if no bot token or initData is explicitly 'mock'
-  if (config.nodeEnv === 'development' && (!config.botToken || initData === 'mock' || !initData)) {
-    // If dev mock header is passed or no auth provided in dev, provide dev user
+  // In development mode, allow mock user only if explicit or bot token not set
+  const isDevMode = config.nodeEnv === 'development';
+  if (isDevMode && (!config.botToken || initData === 'mock' || !initData)) {
     const mockId = req.headers['x-mock-telegram-id'] || '999888777';
+    const isMockAdmin = req.headers['x-dev-admin'] === 'true' && config.allowDevAdmin;
     req.telegramUser = {
       id: Number(mockId),
       first_name: req.headers['x-mock-first-name'] || 'Alex',
@@ -87,7 +88,7 @@ export function telegramAuthMiddleware(req, res, next) {
       username: 'alextashkent',
       language_code: 'uz'
     };
-    req.isAdmin = config.adminIds.includes(req.telegramUser.id);
+    req.isAdmin = isMockAdmin || (config.adminIds.includes(req.telegramUser.id) && Boolean(config.allowDevAdmin));
     return next();
   }
 

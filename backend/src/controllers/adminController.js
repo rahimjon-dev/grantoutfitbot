@@ -67,6 +67,12 @@ export const adminController = {
   async saveProduct(req, res) {
     try {
       const productData = req.body;
+      if (!productData.name_en && !productData.name_uz) {
+        return res.status(400).json({ success: false, error: 'Product name is required' });
+      }
+      if (productData.base_price_uzs === undefined || Number(productData.base_price_uzs) <= 0) {
+        return res.status(400).json({ success: false, error: 'A valid positive base price is required' });
+      }
       const saved = await db.saveProduct(productData);
       res.json({ success: true, data: saved });
     } catch (err) {
@@ -78,10 +84,42 @@ export const adminController = {
   async deleteProduct(req, res) {
     try {
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ success: false, error: 'Product ID is required' });
+      }
       await db.deleteProduct(id);
       res.json({ success: true, message: 'Product deleted' });
     } catch (err) {
       console.error('Error deleting product:', err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  },
+
+  // --- CATEGORIES MANAGEMENT ---
+  async saveCategory(req, res) {
+    try {
+      const categoryData = req.body;
+      if (!categoryData.name_uz && !categoryData.name_en) {
+        return res.status(400).json({ success: false, error: 'Category name is required' });
+      }
+      const saved = await db.saveCategory(categoryData);
+      res.json({ success: true, data: saved });
+    } catch (err) {
+      console.error('Error saving category:', err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  },
+
+  async deleteCategory(req, res) {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ success: false, error: 'Category ID is required' });
+      }
+      await db.deleteCategory(id);
+      res.json({ success: true, message: 'Category deleted' });
+    } catch (err) {
+      console.error('Error deleting category:', err);
       res.status(500).json({ success: false, error: err.message });
     }
   },
