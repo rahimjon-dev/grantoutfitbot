@@ -1,6 +1,6 @@
 import { botDb } from '../services/db.js';
 import { t } from '../locales/index.js';
-import { getContactShareKeyboard, getMainReplyKeyboard } from '../keyboards/index.js';
+import { getContactShareKeyboard, getMainReplyKeyboard, getStoreInlineKeyboard } from '../keyboards/index.js';
 import { config } from '../config/index.js';
 
 function formatUzs(amount) {
@@ -16,7 +16,8 @@ export async function handleMyOrders(ctx) {
 
   if (!orders || orders.length === 0) {
     return ctx.reply(t(lang, 'no_orders'), {
-      parse_mode: 'Markdown'
+      parse_mode: 'Markdown',
+      reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
     });
   }
 

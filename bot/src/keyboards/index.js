@@ -10,11 +10,23 @@ export function getLanguageInlineKeyboard() {
     .text('🇬🇧 English', 'set_lang:en');
 }
 
+export function getStoreInlineKeyboard(lang = 'uz', miniAppUrl) {
+  const url = miniAppUrl || 'https://grantoutfitbot.vercel.app/';
+  const buttonText = lang === 'en'
+    ? '🛍 Open Store'
+    : lang === 'ru'
+      ? '🛍 Открыть Магазин'
+      : '🛍 Do‘konni Ochish';
+
+  return new InlineKeyboard().webApp(buttonText, url);
+}
+
 export function getMainReplyKeyboard(lang = 'uz', miniAppUrl) {
+  const url = miniAppUrl || 'https://grantoutfitbot.vercel.app/';
   const kb = new Keyboard();
 
-  if (miniAppUrl && miniAppUrl.startsWith('https://')) {
-    kb.webApp(t(lang, 'btn_store'), miniAppUrl);
+  if (url && url.startsWith('https://')) {
+    kb.webApp(t(lang, 'btn_store'), url);
   } else {
     kb.text(t(lang, 'btn_store'));
   }

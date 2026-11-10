@@ -6,7 +6,7 @@ export default function DevToolbar({ activeTab, setActiveTab }) {
   const { isInsideTelegram, isAdmin, updateDevUser, user } = useTelegram();
   const [collapsed, setCollapsed] = useState(true);
 
-  if (isInsideTelegram) return null; // Only show when outside Telegram
+  if (isInsideTelegram || !import.meta.env.DEV) return null; // Only show in local development mode outside Telegram
 
   return (
     <div className="bg-zinc-950/95 border-b border-amber-500/30 text-zinc-300 text-xs px-4 py-2 transition-all">

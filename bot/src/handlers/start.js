@@ -1,5 +1,5 @@
 import { botDb } from '../services/db.js';
-import { getLanguageInlineKeyboard, getMainReplyKeyboard } from '../keyboards/index.js';
+import { getLanguageInlineKeyboard, getMainReplyKeyboard, getStoreInlineKeyboard } from '../keyboards/index.js';
 import { t } from '../locales/index.js';
 import { config } from '../config/index.js';
 
@@ -14,7 +14,7 @@ export async function handleStart(ctx) {
         chat_id: telegramId,
         menu_button: {
           type: 'web_app',
-          text: '🛍 Do‘kon',
+          text: 'Open Store',
           web_app: { url: config.miniAppUrl }
         }
       });
@@ -39,10 +39,20 @@ export async function handleStart(ctx) {
 
   // User already has a language saved
   const lang = user.language_code;
-  const greeting = `✨ *GRANT LUXURY OUTFITBOT*\n\nXush kelibsiz, ${ctx.from.first_name}!\nKolleksiyani ko‘rish uchun quyidagi *Onlayn Do‘kon* tugmasini bosing.`;
+  const greeting = lang === 'en'
+    ? `✨ *GRANT LUXURY OUTFITBOT*\n\nWelcome, ${ctx.from.first_name}!\nClick *Open Store* below to explore the latest collection.`
+    : lang === 'ru'
+      ? `✨ *GRANT LUXURY OUTFITBOT*\n\nДобро пожаловать, ${ctx.from.first_name}!\nНажмите кнопку *Открыть Магазин* ниже, чтобы перейти к покупкам.`
+      : `✨ *GRANT LUXURY OUTFITBOT*\n\nXush kelibsiz, ${ctx.from.first_name}!\nKolleksiyani ko‘rish uchun quyidagi *Do‘konni Ochish* tugmasini bosing.`;
 
+  // First ensure persistent keyboard is active
+  await ctx.reply(`📱 Menyudan foydalanishingiz mumkin:`, {
+    reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
+  });
+
+  // Provide direct inline web_app button
   return ctx.reply(greeting, {
     parse_mode: 'Markdown',
-    reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
+    reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
   });
 }

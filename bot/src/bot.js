@@ -1,9 +1,11 @@
 import { Bot } from 'grammy';
 import { config } from './config/index.js';
+import { botDb } from './services/db.js';
 import { handleStart } from './handlers/start.js';
 import { handleLanguageCallback, handleChangeLanguageCommand } from './handlers/language.js';
 import { handleMyOrders, handleProfile, handleSupport, handleContactShare, handleCancel, handleManualPhone } from './handlers/menu.js';
 import { handleAdminCallback, handleAdminCommand, handleMyChatMember } from './handlers/admin.js';
+import { getStoreInlineKeyboard } from './keyboards/index.js';
 
 if (!config.botToken) {
   console.warn('⚠️ TELEGRAM_BOT_TOKEN is not set. Bot is in mock/standby mode.');
@@ -16,6 +18,22 @@ bot.command('start', handleStart);
 bot.command('admin', handleAdminCommand);
 bot.command('language', handleChangeLanguageCommand);
 bot.command('cancel', handleCancel);
+
+// Quick commands to open store
+bot.command(['store', 'shop', 'app', 'open'], async (ctx) => {
+  const user = await botDb.getUser(ctx.from.id);
+  const lang = user?.language_code || 'uz';
+  const label = lang === 'en'
+    ? '🛍 *Click below to open GRANT Online Store:*'
+    : lang === 'ru'
+      ? '🛍 *Нажмите кнопку ниже, чтобы открыть магазин GRANT:*'
+      : '🛍 *GRANT do‘konini ochish uchun quyidagi tugmani bosing:*';
+
+  await ctx.reply(label, {
+    parse_mode: 'Markdown',
+    reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
+  });
+});
 
 // Callback queries
 bot.callbackQuery(/^set_lang:/, handleLanguageCallback);
@@ -33,20 +51,20 @@ bot.hears([/Bekor qilish/i, /Отмена/i, /Cancel/i], handleCancel);
 // Manual phone number typing
 bot.hears(/^\+?[0-9\s\-()]{9,20}$/, handleManualPhone);
 
-// Persistent Keyboard Button Matchers (Multilingual)
-bot.hears([/Onlayn Do‘kon/i, /Онлайн Магазин/i, /Online Store/i], async (ctx) => {
-  if (config.miniAppUrl && config.miniAppUrl.startsWith('https://')) {
-    await ctx.reply('🛍 *GRANT Mini App do‘konini ochish uchun quyidagi tugmani bosing:*', {
-      parse_mode: 'Markdown',
-      reply_markup: {
-        inline_keyboard: [[{ text: '🛍 Do‘konni Ochish', web_app: { url: config.miniAppUrl } }]]
-      }
-    });
-  } else {
-    await ctx.reply(`🛍 *GRANT ONLINE STORE*\n\nDo‘konga kirish havolasi:\n👉 ${config.miniAppUrl}\n\n💡 _Telegram ichida Mini App ochilishi uchun HTTPS havola (masalan, Vercel yoki ngrok) kerak._`, {
-      parse_mode: 'Markdown'
-    });
-  }
+// Persistent Keyboard Button Matchers (Multilingual & Open Store variants)
+bot.hears([/Onlayn Do‘kon/i, /Онлайн Магазин/i, /Online Store/i, /Open Store/i, /Open Mini App/i, /Do‘konni ochish/i, /Do‘kon/i, /Store/i, /Shop/i], async (ctx) => {
+  const user = await botDb.getUser(ctx.from.id);
+  const lang = user?.language_code || 'uz';
+  const promptText = lang === 'en'
+    ? '🛍 *GRANT Luxury Fashion Mini App*\nClick below to browse our collection directly in Telegram:'
+    : lang === 'ru'
+      ? '🛍 *GRANT Luxury Fashion Mini App*\nНажмите кнопку ниже, чтобы открыть каталог внутри Telegram:'
+      : '🛍 *GRANT Luxury Fashion Mini App*\nKolleksiyani Telegram ichida ko‘rish uchun quyidagi tugmani bosing:';
+
+  await ctx.reply(promptText, {
+    parse_mode: 'Markdown',
+    reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
+  });
 });
 bot.hears([/Buyurtmalarim/i, /Мои Заказы/i, /My Orders/i], handleMyOrders);
 bot.hears([/Profilim/i, /Мой Профиль/i, /My Profile/i], handleProfile);
@@ -66,12 +84,28 @@ bot.catch((err) => {
 // Launch bot if token is present
 if (config.botToken && config.botToken !== 'dummy_token') {
   bot.start({
-    onStart: (botInfo) => {
+    onStart: async (botInfo) => {
       console.log(`===============================================`);
       console.log(`🤖 Telegram Bot @${botInfo.username} started successfully!`);
       console.log(`📱 Mini App URL: ${config.miniAppUrl}`);
       console.log(`👑 Admins: [${config.adminIds.join(', ')}]`);
       console.log(`===============================================`);
+
+      // Set global default chat menu button for all users
+      if (config.miniAppUrl && config.miniAppUrl.startsWith('https://')) {
+        try {
+          await bot.api.setChatMenuButton({
+            menu_button: {
+              type: 'web_app',
+              text: 'Open Store',
+              web_app: { url: config.miniAppUrl }
+            }
+          });
+          console.log(`✅ Default Chat Menu Button configured: "Open Store" -> ${config.miniAppUrl}`);
+        } catch (err) {
+          console.warn('⚠️ Could not set global chat menu button on startup:', err.message);
+        }
+      }
     }
   });
 

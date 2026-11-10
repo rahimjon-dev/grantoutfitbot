@@ -9,7 +9,25 @@ const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {
-    return localStorage.getItem('grant_lang') || 'uz';
+    const saved = localStorage.getItem('grant_lang');
+    if (saved && ['uz', 'ru', 'en'].includes(saved)) return saved;
+
+    // Detect language from Telegram WebApp user context
+    const tgLang = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code : null;
+    if (tgLang) {
+      if (tgLang.startsWith('ru')) return 'ru';
+      if (tgLang.startsWith('uz')) return 'uz';
+      if (tgLang.startsWith('en')) return 'en';
+    }
+
+    // Detect language from browser environment
+    if (typeof navigator !== 'undefined' && navigator.language) {
+      if (navigator.language.startsWith('ru')) return 'ru';
+      if (navigator.language.startsWith('uz')) return 'uz';
+      if (navigator.language.startsWith('en')) return 'en';
+    }
+
+    return 'uz';
   });
 
   useEffect(() => {

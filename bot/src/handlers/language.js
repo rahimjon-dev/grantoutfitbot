@@ -1,5 +1,5 @@
 import { botDb } from '../services/db.js';
-import { getLanguageInlineKeyboard, getMainReplyKeyboard } from '../keyboards/index.js';
+import { getLanguageInlineKeyboard, getMainReplyKeyboard, getStoreInlineKeyboard } from '../keyboards/index.js';
 import { t } from '../locales/index.js';
 import { config } from '../config/index.js';
 
@@ -15,14 +15,33 @@ export async function handleLanguageCallback(ctx) {
     username: ctx.from.username
   });
 
+  // Configure Telegram Menu Button for this user
+  if (config.miniAppUrl && config.miniAppUrl.startsWith('https://')) {
+    try {
+      await ctx.api.setChatMenuButton({
+        chat_id: telegramId,
+        menu_button: {
+          type: 'web_app',
+          text: 'Open Store',
+          web_app: { url: config.miniAppUrl }
+        }
+      });
+    } catch (_) {}
+  }
+
   await ctx.answerCallbackQuery({
     text: langCode === 'uz' ? 'Til saqlandi!' : langCode === 'ru' ? 'Язык сохранен!' : 'Language saved!'
   });
 
-  // Send localized confirmation with persistent reply keyboard
+  // Send persistent keyboard for ongoing navigation
+  await ctx.reply(`📱 Menyudan foydalanishingiz mumkin:`, {
+    reply_markup: getMainReplyKeyboard(langCode, config.miniAppUrl)
+  });
+
+  // Send localized confirmation with direct inline Web App button
   await ctx.reply(t(langCode, 'language_selected'), {
     parse_mode: 'Markdown',
-    reply_markup: getMainReplyKeyboard(langCode, config.miniAppUrl)
+    reply_markup: getStoreInlineKeyboard(langCode, config.miniAppUrl)
   });
 }
 

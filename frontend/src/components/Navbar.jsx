@@ -19,7 +19,9 @@ export default function Navbar({ activeTab, setActiveTab }) {
   ];
 
   const currentLangObj = languages.find((l) => l.code === lang) || languages[0];
-  const userName = user?.first_name ? `${user.first_name} ${user?.last_name || ''}`.trim() : 'Rahimjon';
+  const userName = user?.first_name
+    ? `${user.first_name} ${user?.last_name || ''}`.trim()
+    : (lang === 'ru' ? 'Гость' : lang === 'en' ? 'Shopper' : 'Mijoz');
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs transition-all">

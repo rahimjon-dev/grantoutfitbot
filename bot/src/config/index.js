@@ -11,7 +11,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 export const config = {
   botToken: process.env.TELEGRAM_BOT_TOKEN || '',
-  miniAppUrl: process.env.TELEGRAM_MINI_APP_URL || 'https://grantoutfitbot.onrender.com',
+  miniAppUrl: (process.env.TELEGRAM_MINI_APP_URL || 'https://grantoutfitbot.vercel.app/').trim(),
   apiBaseUrl: process.env.API_BASE_URL || 'https://grantoutfitbot.onrender.com',
   adminIds: (process.env.ADMIN_TELEGRAM_IDS || '')
     .split(',')
