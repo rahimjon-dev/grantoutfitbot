@@ -82,5 +82,12 @@
   "total_users": "Registered Users",
   "update_status": "Update Status",
   "tracking_code": "Tracking Code",
-  "dispatch_notes": "Dispatch Instructions"
+  "dispatch_notes": "Dispatch Instructions",
+  "favorites_subtitle": "Your curated selection of saved pieces",
+  "favorites_empty_title": "Your favorites list is empty",
+  "favorites_empty_sub": "Tap the heart icon on any piece to save it here for later.",
+  "go_to_catalog": "Explore Catalog",
+  "orders_subtitle": "Track your order status and delivery updates",
+  "orders_loading": "Loading your orders...",
+  "orders_empty_sub": "You don't have any active orders yet. Browse our latest arrivals!"
 }

@@ -1,5 +1,5 @@
 import { Bot } from 'grammy';
-import { config } from './config/index.js';
+import { config, validateBotConfig } from './config/index.js';
 import { botDb } from './services/db.js';
 import { handleStart } from './handlers/start.js';
 import { handleLanguageCallback, handleChangeLanguageCommand } from './handlers/language.js';
@@ -85,6 +85,7 @@ bot.catch((err) => {
 if (config.botToken && config.botToken !== 'dummy_token') {
   bot.start({
     onStart: async (botInfo) => {
+      validateBotConfig();
       console.log(`===============================================`);
       console.log(`🤖 Telegram Bot @${botInfo.username} started successfully!`);
       console.log(`📱 Mini App URL: ${config.miniAppUrl}`);

@@ -36,9 +36,9 @@ export default function CartDrawer() {
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                  My Cart
+                  {t('cart_title')}
                 </h2>
-                <span className="text-[11px] text-slate-400 font-medium">{items.length} items</span>
+                <span className="text-[11px] text-slate-400 font-medium">{items.length} {t('order_items')}</span>
               </div>
             </div>
             <button

@@ -154,13 +154,13 @@ API_BASE_URL=http://localhost:5000
 FRONTEND_URL=http://localhost:5173
 
 # Telegram
-TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrSTUvwxYZ
-TELEGRAM_MINI_APP_URL=http://localhost:5173
+TELEGRAM_BOT_TOKEN=your_bot_token_from_botfather
+TELEGRAM_MINI_APP_URL=https://grantoutfitbot.vercel.app/
 ADMIN_TELEGRAM_IDS=123456789
 
 # Security
-ADMIN_SECRET_KEY=grant_secret_key_2026
-JWT_SECRET=super_secret_jwt_key_at_least_32_characters_long
+ADMIN_SECRET_KEY=your_secure_admin_passphrase
+JWT_SECRET=your_jwt_secret_at_least_32_characters_long
 
 # Supabase
 SUPABASE_URL=https://your-project.supabase.co

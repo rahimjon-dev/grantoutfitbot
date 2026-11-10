@@ -1,0 +1,57 @@
+# ============================================================
+# GRANT OUTFITBOT - RENDER DEPLOYMENT BLUEPRINT
+# ============================================================
+
+services:
+  # 1. Express Backend Web Service
+  - type: web
+    name: grantoutfitbot-backend
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm run install:backend
+    startCommand: npm --prefix backend start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_URL
+        value: https://grantoutfitbot.vercel.app
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ADMIN_TELEGRAM_IDS
+        sync: false
+      - key: ADMIN_SECRET_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+  # 2. Telegram Bot Polling Worker (Single Instance)
+  - type: worker
+    name: grantoutfitbot-bot
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm run install:bot
+    startCommand: npm --prefix bot start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TELEGRAM_MINI_APP_URL
+        value: https://grantoutfitbot.vercel.app/
+      - key: API_BASE_URL
+        value: https://grantoutfitbot.onrender.com
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ADMIN_TELEGRAM_IDS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

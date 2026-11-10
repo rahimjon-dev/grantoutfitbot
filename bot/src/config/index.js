@@ -23,3 +23,15 @@ export const config = {
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
   }
 };
+
+export function validateBotConfig() {
+  const missing = [];
+  if (!config.botToken) missing.push('TELEGRAM_BOT_TOKEN');
+  if (!config.supabase.url) missing.push('SUPABASE_URL');
+  if (!config.supabase.serviceRoleKey) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+
+  if (missing.length > 0) {
+    console.warn(`⚠️ [BOT CONFIG WARNING] Missing configuration variables: ${missing.join(', ')}`);
+  }
+  return { isValid: missing.length === 0, missing };
+}

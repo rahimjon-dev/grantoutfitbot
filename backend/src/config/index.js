@@ -26,5 +26,24 @@ export const config = {
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     anonKey: process.env.SUPABASE_ANON_KEY || ''
   },
-  frontendUrl: process.env.FRONTEND_URL || 'https://grantoutfitbot.onrender.com'
+  frontendUrl: process.env.FRONTEND_URL || 'https://grantoutfitbot.vercel.app'
 };
+
+export function validateConfig() {
+  const missing = [];
+  if (!config.supabase.url) missing.push('SUPABASE_URL');
+  if (!config.supabase.serviceRoleKey) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+
+  if (missing.length > 0) {
+    console.warn(`⚠️ [CONFIG WARNING] Missing critical environment variables: ${missing.join(', ')}`);
+    if (config.nodeEnv === 'production') {
+      console.error(`❌ [CONFIG ERROR] Production server requires: ${missing.join(', ')}`);
+    }
+  }
+
+  if (!config.botToken) {
+    console.warn('⚠️ [CONFIG WARNING] TELEGRAM_BOT_TOKEN is not set. Telegram auth validation will be in standby/mock mode.');
+  }
+
+  return { isValid: missing.length === 0, missing };
+}

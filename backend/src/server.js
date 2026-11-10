@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import { config } from './config/index.js';
+import { config, validateConfig } from './config/index.js';
 import { db } from './services/supabase.js';
 
 import path from 'path';
@@ -92,6 +92,7 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(config.port, () => {
+  validateConfig();
   console.log(`===============================================`);
   console.log(`🚀 Grant Outfitbot Backend running on port ${config.port}`);
   console.log(`📍 Environment: ${config.nodeEnv}`);

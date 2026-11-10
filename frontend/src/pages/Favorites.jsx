@@ -15,7 +15,7 @@ export default function Favorites({ onSelectProduct, onNavigateToCatalog }) {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {t('nav_favorites')} ({favorites.length})
           </h1>
-          <p className="text-xs text-slate-500">Sizga yoqqan eksklyuziv liboslar to‘plami</p>
+          <p className="text-xs text-slate-500">{t('favorites_subtitle')}</p>
         </div>
       </div>
 
@@ -24,15 +24,15 @@ export default function Favorites({ onSelectProduct, onNavigateToCatalog }) {
           <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto text-slate-400">
             <Heart size={32} />
           </div>
-          <h3 className="text-base font-bold text-slate-900">Sevimlilar ro‘yxati bo‘sh</h3>
+          <h3 className="text-base font-bold text-slate-900">{t('favorites_empty_title')}</h3>
           <p className="text-xs text-slate-500 max-w-xs mx-auto">
-            O‘zingizga yoqqan kiyimlardagi yurakcha belgisini bosib, ularni bu yerga saqlab qo‘yishingiz mumkin.
+            {t('favorites_empty_sub')}
           </p>
           <button
             onClick={onNavigateToCatalog}
             className="px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20"
           >
-            Katalogga o‘tish
+            {t('go_to_catalog')}
           </button>
         </div>
       ) : (

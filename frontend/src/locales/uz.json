@@ -82,5 +82,12 @@
   "total_users": "Mijozlar Soni",
   "update_status": "Holatni o‘zgartirish",
   "tracking_code": "Trek-kod",
-  "dispatch_notes": "Kuryer xabarnomasi"
+  "dispatch_notes": "Kuryer xabarnomasi",
+  "favorites_subtitle": "Sizga yoqqan eksklyuziv liboslar to‘plami",
+  "favorites_empty_title": "Sevimlilar ro‘yxati bo‘sh",
+  "favorites_empty_sub": "O‘zingizga yoqqan kiyimlardagi yurakcha belgisini bosib, ularni bu yerga saqlab qo‘yishingiz mumkin.",
+  "go_to_catalog": "Katalogga o‘tish",
+  "orders_subtitle": "Buyurtmalaringiz holati va yetkazilish tafsilotlari",
+  "orders_loading": "Buyurtmalar yuklanmoqda...",
+  "orders_empty_sub": "Hozircha sizda faol buyurtmalar yo‘q. Do‘konimizdagi yangi kiyimlarni ko‘zdan kechiring!"
 }

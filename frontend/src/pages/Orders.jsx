@@ -36,7 +36,7 @@ export default function Orders({ onNavigateToCatalog }) {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {t('orders_title')}
           </h1>
-          <p className="text-xs text-slate-500">Buyurtmalaringiz holati va yetkazilish tafsilotlari</p>
+          <p className="text-xs text-slate-500">{t('orders_subtitle')}</p>
         </div>
 
         <button
@@ -51,7 +51,7 @@ export default function Orders({ onNavigateToCatalog }) {
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center space-y-3">
           <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-slate-500">Buyurtmalar yuklanmoqda...</p>
+          <p className="text-xs text-slate-500">{t('orders_loading')}</p>
         </div>
       ) : error ? (
         <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-xs flex items-center gap-2">
@@ -65,13 +65,13 @@ export default function Orders({ onNavigateToCatalog }) {
           </div>
           <h3 className="text-base font-bold text-slate-900">{t('orders_empty')}</h3>
           <p className="text-xs text-slate-500 max-w-xs mx-auto">
-            Hozircha sizda faol buyurtmalar yo‘q. Do‘konimizdagi yangi kiyimlarni ko‘zdan kechiring!
+            {t('orders_empty_sub')}
           </p>
           <button
             onClick={onNavigateToCatalog}
             className="px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20"
           >
-            Katalogga o‘tish
+            {t('go_to_catalog')}
           </button>
         </div>
       ) : (
