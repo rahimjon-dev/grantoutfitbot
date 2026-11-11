@@ -11,25 +11,21 @@ export function getLanguageInlineKeyboard() {
 }
 
 export function getStoreInlineKeyboard(lang = 'uz', miniAppUrl) {
-  const url = miniAppUrl || 'https://grantoutfitbot.vercel.app/';
+  const url = (miniAppUrl || 'https://grantoutfitbot.vercel.app/').trim();
   const buttonText = lang === 'en'
-    ? '🛍 Open Store'
+    ? '🛍 Open Mini App'
     : lang === 'ru'
-      ? '🛍 Открыть Магазин'
-      : '🛍 Do‘konni Ochish';
+      ? '🛍 Открыть Mini App'
+      : '🛍 Do‘konni Ochish (Mini App)';
 
   return new InlineKeyboard().webApp(buttonText, url);
 }
 
 export function getMainReplyKeyboard(lang = 'uz', miniAppUrl) {
-  const url = miniAppUrl || 'https://grantoutfitbot.vercel.app/';
+  const url = (miniAppUrl || 'https://grantoutfitbot.vercel.app/').trim();
   const kb = new Keyboard();
 
-  if (url && url.startsWith('https://')) {
-    kb.webApp(t(lang, 'btn_store'), url);
-  } else {
-    kb.text(t(lang, 'btn_store'));
-  }
+  kb.webApp(t(lang, 'btn_store'), url);
 
   return kb
     .row()
