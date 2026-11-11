@@ -28,3 +28,4 @@ SET registration_status = 'completed',
     phone_verified = COALESCE(phone_verified, true),
     registered_at = COALESCE(registered_at, created_at, NOW())
 WHERE phone_number IS NOT NULL AND (registration_status IS NULL OR registration_status = 'unregistered');
+

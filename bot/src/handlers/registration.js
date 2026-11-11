@@ -7,6 +7,7 @@ import {
 } from '../keyboards/index.js';
 import { t } from '../locales/index.js';
 import { config } from '../config/index.js';
+import { handleProfile } from './menu.js';
 
 // Helper: Name validation (letters, apostrophes, hyphens, spaces, 2-50 chars)
 function isValidName(name) {
@@ -52,7 +53,7 @@ export async function handleRegistrationTextInput(ctx, next) {
         parse_mode: 'Markdown',
         reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
       });
-      return;
+      return handleProfile(ctx);
     }
 
     if (user.edit_state === 'editing_last_name') {
@@ -64,7 +65,7 @@ export async function handleRegistrationTextInput(ctx, next) {
         parse_mode: 'Markdown',
         reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
       });
-      return;
+      return handleProfile(ctx);
     }
 
     if (user.edit_state === 'editing_phone') {
@@ -80,7 +81,7 @@ export async function handleRegistrationTextInput(ctx, next) {
         parse_mode: 'Markdown',
         reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
       });
-      return;
+      return handleProfile(ctx);
     }
   }
 
@@ -190,7 +191,7 @@ export async function handleContactShare(ctx) {
       parse_mode: 'Markdown',
       reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
     });
-    return;
+    return handleProfile(ctx);
   }
 
   // Complete onboarding registration
@@ -213,3 +214,4 @@ export async function handleContactShare(ctx) {
     reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
   });
 }
+

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTelegram } from './TelegramContext.jsx';
+import { api } from '../services/api.js';
 import uz from '../locales/uz.json';
 import ru from '../locales/ru.json';
 import en from '../locales/en.json';
@@ -28,6 +29,14 @@ export function LanguageProvider({ children }) {
     }
   }, [profile?.language_code]);
 
+  const handleSetLang = (newLang) => {
+    if (['uz', 'ru', 'en'].includes(newLang)) {
+      setLang(newLang);
+      localStorage.setItem('grant_lang', newLang);
+      api.updateProfile({ languageCode: newLang }).catch(() => {});
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem('grant_lang', lang);
   }, [lang]);
@@ -48,7 +57,7 @@ export function LanguageProvider({ children }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, getLocalizedField }}>
+    <LanguageContext.Provider value={{ lang, setLang: handleSetLang, t, getLocalizedField }}>
       {children}
     </LanguageContext.Provider>
   );

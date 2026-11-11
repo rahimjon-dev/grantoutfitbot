@@ -11,7 +11,7 @@ import {
   handleSupport,
   handleCancel
 } from './handlers/menu.js';
-import { handleAdminCallback, handleAdminCommand, handleMyChatMember } from './handlers/admin.js';
+import { handleAdminCallback, handleAdminCommand, handleStatsCommand, handleMyChatMember } from './handlers/admin.js';
 import { getStoreInlineKeyboard } from './keyboards/index.js';
 
 if (!config.botToken) {
@@ -23,6 +23,7 @@ const bot = new Bot(config.botToken || 'dummy_token');
 // Commands
 bot.command('start', handleStart);
 bot.command('admin', handleAdminCommand);
+bot.command('stats', handleStatsCommand);
 bot.command(['language', 'lang'], handleChangeLanguageCommand);
 bot.command('cancel', handleCancel);
 

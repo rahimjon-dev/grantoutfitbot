@@ -73,6 +73,7 @@ export async function handleProfile(ctx) {
     : (user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Yaqinda');
 
   const ordersCount = await botDb.getUserOrderCount(telegramId);
+  const countLabel = lang === 'uz' ? `${ordersCount} ta` : `${ordersCount}`;
 
   const text = `${t(lang, 'profile_title')}
 ${t(lang, 'profile_name')} *${fullName}*
@@ -80,7 +81,7 @@ ${t(lang, 'profile_username')} *${username}*
 ${t(lang, 'profile_phone')} \`${phone}\` (${verifiedBadge})
 ${t(lang, 'profile_lang')} *${langLabel}*
 ${t(lang, 'profile_reg_date')} _${regDate}_
-${t(lang, 'profile_orders_count')} *${ordersCount} ta*`;
+${t(lang, 'profile_orders_count')} *${countLabel}*`;
 
   return ctx.reply(text, {
     parse_mode: 'Markdown',

@@ -78,7 +78,7 @@ ${itemsSummary}
         ],
         [
           { text: '❌ Bekor qilish', callback_data: `adm:reject:${order.id || order.order_number}` },
-          { text: '📞 Mijoz bilan aloqa', url: `tg://user?id=${order.telegram_id}` }
+          ...(order.telegram_id ? [{ text: '📞 Mijoz bilan aloqa', url: `tg://user?id=${order.telegram_id}` }] : [])
         ]
       ]
     };

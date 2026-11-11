@@ -18,7 +18,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
     { id: 'store', label: t('nav_store'), icon: Home },
     { id: 'catalog', label: t('nav_catalog'), icon: Compass },
     { id: 'favorites', label: t('nav_favorites'), icon: Heart, badge: favorites.length },
-    { id: 'orders', label: 'Buyurtma', icon: Package },
+    { id: 'orders', label: t('nav_orders'), icon: Package },
     { id: 'profile', label: t('nav_profile'), icon: User }
   ];
 

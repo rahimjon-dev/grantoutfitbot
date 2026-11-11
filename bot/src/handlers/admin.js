@@ -1,5 +1,6 @@
 import { botDb } from '../services/db.js';
 import { config } from '../config/index.js';
+import { t } from '../locales/index.js';
 
 export async function handleAdminCallback(ctx) {
   const adminId = ctx.from.id;
@@ -28,11 +29,26 @@ export async function handleAdminCallback(ctx) {
     return ctx.answerCallbackQuery({ text: 'Noma‘lum harakat' });
   }
 
-  await botDb.updateOrderStatus(orderId, newStatus, adminId);
+  const orderRecord = await botDb.updateOrderStatus(orderId, newStatus, adminId);
 
   await ctx.answerCallbackQuery({
     text: `✅ Buyurtma holati o‘zgartirildi: ${newStatus.toUpperCase()}`
   });
+
+  // Notify customer about order status change in their selected language
+  if (orderRecord && orderRecord.telegram_id) {
+    const customerLang = await botDb.getUserLanguage(orderRecord.telegram_id);
+    const orderNum = orderRecord.order_number || orderId;
+    const statusLabel = t(customerLang, `status_${newStatus}`) || newStatus.toUpperCase();
+
+    const customerNotice = customerLang === 'ru'
+      ? `📦 *Обновление по вашему заказу №${orderNum}:*\nHolat: *${statusLabel}*\n\nСпасибо, что выбираете GRANT!`
+      : customerLang === 'en'
+        ? `📦 *Update on your order #${orderNum}:*\nStatus: *${statusLabel}*\n\nThank you for choosing GRANT!`
+        : `📦 *№${orderNum} buyurtmangiz bo‘yicha yangilanish:*\nHolat: *${statusLabel}*\n\nGRANT do‘konini tanlaganingiz uchun rahmat!`;
+
+    ctx.api.sendMessage(orderRecord.telegram_id, customerNotice, { parse_mode: 'Markdown' }).catch(() => {});
+  }
 
   // Edit message with action stamp
   try {
@@ -64,6 +80,20 @@ Siz do‘kon administratori sifatida ro‘yxatdasiz.
 
 Buyruqlar:
 /stats — Do‘konning umumiy ko‘rsatkichlari`;
+
+  await ctx.reply(text, { parse_mode: 'Markdown' });
+}
+
+export async function handleStatsCommand(ctx) {
+  const adminId = ctx.from.id;
+
+  if (!config.adminIds.includes(adminId)) {
+    return ctx.reply('⛔️ Bu buyruq faqat do‘kon administratorlari uchun mo‘ljallangan.');
+  }
+
+  const stats = await botDb.getAdminStats();
+  const lang = await botDb.getUserLanguage(adminId);
+  const text = `${t(lang, 'admin_panel_title')}\n\n${t(lang, 'admin_stats', stats)}`;
 
   await ctx.reply(text, { parse_mode: 'Markdown' });
 }

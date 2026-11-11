@@ -399,6 +399,33 @@ export const botDb = {
     return ordersStore.filter(o => o.telegram_id === tid).length;
   },
 
+  async getAdminStats() {
+    let usersCount = usersStore.size;
+    let ordersCount = ordersStore.length;
+    let pendingCount = ordersStore.filter(o => o.status === 'pending').length;
+    let totalRevenue = ordersStore.filter(o => o.status === 'delivered').reduce((sum, o) => sum + (o.total_amount_uzs || 0), 0);
+
+    if (supabase) {
+      try {
+        const [uRes, oRes, pRes] = await Promise.all([
+          withTimeout(supabase.from('users').select('id', { count: 'exact', head: true })),
+          withTimeout(supabase.from('orders').select('id', { count: 'exact', head: true })),
+          withTimeout(supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending'))
+        ]);
+        if (typeof uRes?.count === 'number') usersCount = uRes.count;
+        if (typeof oRes?.count === 'number') ordersCount = oRes.count;
+        if (typeof pRes?.count === 'number') pendingCount = pRes.count;
+      } catch (_) {}
+    }
+
+    return {
+      users: usersCount,
+      orders: ordersCount,
+      pending: pendingCount,
+      revenue: new Intl.NumberFormat('uz-UZ').format(totalRevenue) + ' so‘m'
+    };
+  },
+
   async updateOrderStatus(orderId, status, adminId) {
     if (supabase) {
       try {
