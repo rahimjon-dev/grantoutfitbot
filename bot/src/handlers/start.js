@@ -1,5 +1,10 @@
 import { botDb } from '../services/db.js';
-import { getLanguageInlineKeyboard, getMainReplyKeyboard, getStoreInlineKeyboard } from '../keyboards/index.js';
+import {
+  getLanguageInlineKeyboard,
+  getMainReplyKeyboard,
+  getStoreInlineKeyboard,
+  getPhoneRequestKeyboard
+} from '../keyboards/index.js';
 import { t } from '../locales/index.js';
 import { config } from '../config/index.js';
 
@@ -18,9 +23,7 @@ export async function handleStart(ctx) {
           web_app: { url: config.miniAppUrl }
         }
       });
-    } catch (err) {
-      // Menu button may fail if url is invalid without fatal impact
-    }
+    } catch (_) {}
   }
 
   // Log user activity
@@ -29,30 +32,48 @@ export async function handleStart(ctx) {
     first_name: ctx.from.first_name
   });
 
-  // If user has not yet chosen a language, prompt selection
-  if (!user || !user.language_code) {
-    return ctx.reply(t('uz', 'welcome'), {
+  // CASE 1: User is already registered and completed onboarding
+  if (user && user.registration_status === 'completed') {
+    const lang = user.language_code || 'uz';
+    const name = user.first_name || ctx.from.first_name || '';
+
+    // Refresh persistent main menu reply keyboard
+    await ctx.reply(`📱 ${lang === 'en' ? 'Main Menu:' : lang === 'ru' ? 'Главное меню:' : 'Asosiy menyu:'}`, {
+      reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
+    });
+
+    // Send localized greeting with direct inline Mini App button
+    return ctx.reply(t(lang, 'welcome_back', { name }), {
       parse_mode: 'Markdown',
-      reply_markup: getLanguageInlineKeyboard()
+      reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
     });
   }
 
-  // User already has a language saved
-  const lang = user.language_code;
-  const greeting = lang === 'en'
-    ? `✨ *GRANT LUXURY OUTFITBOT*\n\nWelcome, ${ctx.from.first_name}!\nClick *Open Store* below to explore the latest collection.`
-    : lang === 'ru'
-      ? `✨ *GRANT LUXURY OUTFITBOT*\n\nДобро пожаловать, ${ctx.from.first_name}!\nНажмите кнопку *Открыть Магазин* ниже, чтобы перейти к покупкам.`
-      : `✨ *GRANT LUXURY OUTFITBOT*\n\nXush kelibsiz, ${ctx.from.first_name}!\nKolleksiyani ko‘rish uchun quyidagi *Do‘konni Ochish* tugmasini bosing.`;
+  // CASE 2: User started but is in the middle of onboarding
+  if (user && user.language_code) {
+    const lang = user.language_code;
 
-  // First ensure persistent keyboard is active
-  await ctx.reply(`📱 Menyudan foydalanishingiz mumkin:`, {
-    reply_markup: getMainReplyKeyboard(lang, config.miniAppUrl)
-  });
+    if (user.registration_status === 'awaiting_first_name') {
+      return ctx.reply(t(lang, 'enter_first_name'), { parse_mode: 'Markdown' });
+    }
 
-  // Provide direct inline web_app button
-  return ctx.reply(greeting, {
+    if (user.registration_status === 'awaiting_last_name') {
+      return ctx.reply(t(lang, 'enter_last_name', { first_name: user.first_name || '' }), {
+        parse_mode: 'Markdown'
+      });
+    }
+
+    if (user.registration_status === 'awaiting_phone') {
+      return ctx.reply(t(lang, 'enter_phone'), {
+        parse_mode: 'Markdown',
+        reply_markup: getPhoneRequestKeyboard(lang)
+      });
+    }
+  }
+
+  // CASE 3: Completely new user or no language chosen
+  return ctx.reply(t('uz', 'welcome'), {
     parse_mode: 'Markdown',
-    reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
+    reply_markup: getLanguageInlineKeyboard()
   });
 }

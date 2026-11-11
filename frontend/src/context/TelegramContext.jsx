@@ -23,6 +23,7 @@ export function TelegramProvider({ children }) {
   });
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [profile, setProfile] = useState(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -42,23 +43,31 @@ export function TelegramProvider({ children }) {
 
   const user = isInsideTelegram ? tg?.initDataUnsafe?.user : devUser;
 
-  // Verify server-side authorization and profile
+  const refreshProfile = async () => {
+    if (!user) return null;
+    try {
+      const res = await api.getProfile();
+      if (res?.data) {
+        setProfile(res.data);
+        setIsAdmin(Boolean(res.data.is_admin));
+        if (res.data.language_code && ['uz', 'ru', 'en'].includes(res.data.language_code)) {
+          localStorage.setItem('grant_lang', res.data.language_code);
+        }
+        return res.data;
+      }
+    } catch (err) {
+      if (!isInsideTelegram && import.meta.env.DEV && devUser?.isAdmin) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    }
+    return null;
+  };
+
+  // Verify server-side authorization and profile on mount
   useEffect(() => {
-    if (!user) return;
-    api.getProfile()
-      .then((res) => {
-        if (res?.data) {
-          setIsAdmin(Boolean(res.data.is_admin));
-        }
-      })
-      .catch((err) => {
-        // In local development, if server is not yet running or mock header is set
-        if (!isInsideTelegram && import.meta.env.DEV && devUser?.isAdmin) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
-      });
+    refreshProfile();
   }, [user?.id, isInsideTelegram]);
 
   const haptic = (type = 'medium') => {
@@ -85,6 +94,8 @@ export function TelegramProvider({ children }) {
     tg,
     isInsideTelegram,
     user,
+    profile,
+    refreshProfile,
     isAdmin,
     setIsAdmin,
     isReady,

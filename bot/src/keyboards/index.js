@@ -38,13 +38,37 @@ export function getMainReplyKeyboard(lang = 'uz', miniAppUrl) {
     .persistent();
 }
 
-export function getContactShareKeyboard(lang = 'uz') {
+export function getPhoneRequestKeyboard(lang = 'uz') {
   return new Keyboard()
     .requestContact(t(lang, 'btn_share_contact'))
     .row()
     .text(t(lang, 'btn_cancel'))
-    .resized()
-    .oneTime();
+    .resized();
+}
+
+export function getCancelKeyboard(lang = 'uz') {
+  return new Keyboard()
+    .text(t(lang, 'btn_cancel'))
+    .resized();
+}
+
+export function getProfileInlineKeyboard(lang = 'uz') {
+  return new InlineKeyboard()
+    .text(t(lang, 'btn_edit_firstname'), 'prof:edit_firstname')
+    .row()
+    .text(t(lang, 'btn_edit_lastname'), 'prof:edit_lastname')
+    .row()
+    .text(t(lang, 'btn_edit_phone'), 'prof:edit_phone');
+}
+
+export function getSupportInlineKeyboard(lang = 'uz', phone = '+998712000000', telegramUsername = 'grant_support') {
+  const cleanPhone = phone.replace(/[^\d+]/g, '');
+  const cleanTg = telegramUsername.replace(/^@/, '');
+
+  return new InlineKeyboard()
+    .url(t(lang, 'btn_call_support'), `tel:${cleanPhone}`)
+    .row()
+    .url(t(lang, 'btn_telegram_support'), `https://t.me/${cleanTg}`);
 }
 
 export function getAdminOrderInlineKeyboard(orderId, customerTelegramId) {

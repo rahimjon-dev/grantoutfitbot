@@ -30,6 +30,9 @@ export default function Profile({ onNavigateToOrders, onNavigateToFavorites, onN
         if (res.data.phone_number) setPhoneNumber(res.data.phone_number);
         if (res.data.delivery_address) setDeliveryAddress(res.data.delivery_address);
         if (res.data.delivery_city) setDeliveryCity(res.data.delivery_city);
+        if (res.data.language_code && ['uz', 'ru', 'en'].includes(res.data.language_code)) {
+          setLang(res.data.language_code);
+        }
       }
     }).catch(() => {});
   }, [user]);

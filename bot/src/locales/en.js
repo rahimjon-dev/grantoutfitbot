@@ -1,6 +1,18 @@
 export const en = {
   welcome: `✨ Welcome to *GRANT LUXURY OUTFITBOT*!\n\nDiscover the finest curation of contemporary apparel, footwear, and accessories crafted for discerning tastemakers.\n\n🌐 Iltimos, muloqot tilini tanlang:\nПожалуйста, выберите язык:\nPlease select your language:`,
-  language_selected: `✅ *Language selected successfully!* (English)\n\nUse the menu below to explore our collection in the Mini App.`,
+  welcome_back: `✨ *GRANT LUXURY OUTFITBOT*\n\nWelcome back, *{name}*!\n\nClick the button below to browse the collection or make a purchase:`,
+  language_selected: `✅ *Language selected successfully!* (English)`,
+
+  // Registration Flow
+  enter_first_name: `📝 *Registration (1/3)*\n\nPlease enter your first name:`,
+  enter_last_name: `📝 *Registration (2/3)*\n\nThank you, *{first_name}*!\nNow please enter your last name:`,
+  enter_phone: `📱 *Registration (3/3)*\n\nPlease share your phone number.\nYou can use the button below to share your contact or type your phone number:`,
+  invalid_first_name: `⚠️ Please enter a valid first name (at least 2 letters, no commands).`,
+  invalid_last_name: `⚠️ Please enter a valid last name (at least 2 letters, no commands).`,
+  invalid_contact_owner: `⚠️ Please share your own contact card, not someone else's!`,
+  invalid_phone: `⚠️ Please enter a valid phone number (e.g. +998901234567).`,
+  registration_completed: `🎉 *Congratulations! Registration completed successfully.*\n\nYou now have full access to GRANT Online Store. Tap below to start browsing:`,
+  unregistered_notice: `⚠️ Please complete registration first.\nTo begin, send the /start command.`,
 
   // Persistent Menu Buttons
   btn_store: '🛍 Online Store',
@@ -9,22 +21,37 @@ export const en = {
   btn_language: '🌐 Change Language',
   btn_support: '📞 Contact Support',
   btn_cancel: '⬅️ Cancel',
+  btn_share_contact: '📱 Share Contact',
 
   // Profile
   profile_title: `👤 *YOUR PROFILE*\n━━━━━━━━━━━━━━━━━━━━`,
-  profile_name: `Name:`,
+  profile_name: `Full Name:`,
+  profile_username: `Username:`,
   profile_phone: `Phone:`,
-  profile_address: `Delivery Address:`,
-  profile_lang: `Language:`,
+  profile_verified: `✅ Verified`,
+  profile_unverified: `⚠️ Unverified`,
+  profile_lang: `Selected Language:`,
+  profile_reg_date: `Registered:`,
+  profile_orders_count: `Total Orders:`,
   profile_not_set: `Not provided`,
-  profile_update_prompt: `Click the button below to share your contact or type your phone number:`,
-  btn_share_contact: `📱 Share Contact Number`,
+
+  // Profile Inline Buttons
+  btn_edit_firstname: `✏️ Edit First Name`,
+  btn_edit_lastname: `✏️ Edit Last Name`,
+  btn_edit_phone: `📱 Update Phone`,
+
+  prompt_edit_firstname: `✏️ Enter your new first name:`,
+  prompt_edit_lastname: `✏️ Enter your new last name:`,
+  prompt_edit_phone: `📱 Send your new phone number (use the contact button or type it):`,
+  profile_updated: `✅ Your profile has been updated successfully!`,
   phone_received: `✅ Your phone number has been saved successfully!`,
   action_cancelled: `⬅️ Cancelled. Main menu:`,
-  invalid_phone: `⚠️ Please enter a valid phone number (e.g. +998901234567).`,
 
   // Support
-  support_text: `📞 *Customer Concierge Support*\n\nIf you have any questions, our concierge team is at your disposal:\n\n💬 Telegram: @grant_support\n☎️ Phone: +998 (71) 200-00-00\n⏰ Hours: 09:00 - 22:00 (Daily)`,
+  support_title: `📞 *CUSTOMER CONCIERGE SUPPORT*\n━━━━━━━━━━━━━━━━━━━━`,
+  support_text: `If you have any questions or inquiries, our concierge team is always here to assist:\n\n☎️ Phone: {phone}\n💬 Telegram: @{telegram}\n⏰ Hours: 09:00 - 22:00 (Daily)`,
+  btn_call_support: `📞 Call Us`,
+  btn_telegram_support: `💬 Message on Telegram`,
 
   // Orders
   no_orders: `📦 You don't have any orders yet.\n\nOpen the store below to discover new arrivals!`,

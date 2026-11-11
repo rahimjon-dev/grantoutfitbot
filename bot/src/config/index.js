@@ -18,6 +18,8 @@ export const config = {
     .map(id => id.trim())
     .filter(Boolean)
     .map(id => Number(id)),
+  supportPhone: process.env.SUPPORT_PHONE || '+998 (71) 200-00-00',
+  supportTelegram: (process.env.SUPPORT_TELEGRAM || 'grant_support').replace(/^@/, ''),
   supabase: {
     url: process.env.SUPABASE_URL || '',
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''

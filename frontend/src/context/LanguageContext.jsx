@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useTelegram } from './TelegramContext.jsx';
 import uz from '../locales/uz.json';
 import ru from '../locales/ru.json';
 import en from '../locales/en.json';
@@ -8,27 +9,24 @@ const translations = { uz, ru, en };
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
+  const { profile } = useTelegram();
+
   const [lang, setLang] = useState(() => {
     const saved = localStorage.getItem('grant_lang');
     if (saved && ['uz', 'ru', 'en'].includes(saved)) return saved;
 
-    // Detect language from Telegram WebApp user context
-    const tgLang = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code : null;
-    if (tgLang) {
-      if (tgLang.startsWith('ru')) return 'ru';
-      if (tgLang.startsWith('uz')) return 'uz';
-      if (tgLang.startsWith('en')) return 'en';
-    }
-
-    // Detect language from browser environment
-    if (typeof navigator !== 'undefined' && navigator.language) {
-      if (navigator.language.startsWith('ru')) return 'ru';
-      if (navigator.language.startsWith('uz')) return 'uz';
-      if (navigator.language.startsWith('en')) return 'en';
-    }
-
+    // Default language is ALWAYS Uzbek
     return 'uz';
   });
+
+  // Synchronize with database profile language chosen in Telegram Bot
+  useEffect(() => {
+    if (profile?.language_code && ['uz', 'ru', 'en'].includes(profile.language_code)) {
+      if (profile.language_code !== lang) {
+        setLang(profile.language_code);
+      }
+    }
+  }, [profile?.language_code]);
 
   useEffect(() => {
     localStorage.setItem('grant_lang', lang);

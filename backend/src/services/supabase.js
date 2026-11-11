@@ -1,5 +1,32 @@
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from '../config/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const BACKEND_DATA_DIR = path.resolve(__dirname, '../../data');
+const BOT_DATA_CACHE = path.resolve(__dirname, '../../../bot/data/users_cache.json');
+const BACKEND_DATA_CACHE = path.join(BACKEND_DATA_DIR, 'users_cache.json');
+
+try {
+  if (!fs.existsSync(BACKEND_DATA_DIR)) {
+    fs.mkdirSync(BACKEND_DATA_DIR, { recursive: true });
+  }
+} catch (_) {}
+
+async function withTimeout(promise, ms = 2500) {
+  let timer;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error('SUPABASE_TIMEOUT')), ms);
+  });
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 let supabaseClient = null;
 let isConnected = false;
@@ -262,6 +289,40 @@ let localCart = new Map(); // telegramId -> array of { variantId, productId, qua
 let localActivity = [];
 let localNotifications = [];
 
+function loadUsersFromDisk() {
+  const tryFiles = [BOT_DATA_CACHE, BACKEND_DATA_CACHE];
+  for (const f of tryFiles) {
+    try {
+      if (fs.existsSync(f)) {
+        const raw = fs.readFileSync(f, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          for (const u of parsed) {
+            if (u && u.telegram_id) {
+              localUsers.set(Number(u.telegram_id), u);
+            }
+          }
+        }
+      }
+    } catch (_) {}
+  }
+}
+loadUsersFromDisk();
+
+let backendSaveTimeout = null;
+function flushUsersToDisk() {
+  if (backendSaveTimeout) clearTimeout(backendSaveTimeout);
+  backendSaveTimeout = setTimeout(() => {
+    try {
+      const list = Array.from(localUsers.values());
+      fs.writeFileSync(BACKEND_DATA_CACHE, JSON.stringify(list, null, 2), 'utf-8');
+      if (fs.existsSync(path.dirname(BOT_DATA_CACHE))) {
+        fs.writeFileSync(BOT_DATA_CACHE, JSON.stringify(list, null, 2), 'utf-8');
+      }
+    } catch (_) {}
+  }, 300);
+}
+
 // ==========================================
 // DB SERVICE METHODS
 // ==========================================
@@ -492,17 +553,25 @@ export const db = {
   async getUserByTelegramId(telegramId) {
     const tid = Number(telegramId);
     if (supabaseClient) {
-      const { data, error } = await supabaseClient
-        .from('users')
-        .select('*')
-        .eq('telegram_id', tid)
-        .maybeSingle();
-      if (!error && data) return data;
+      try {
+        const { data, error } = await withTimeout(
+          supabaseClient
+            .from('users')
+            .select('*')
+            .eq('telegram_id', tid)
+            .maybeSingle()
+        );
+        if (!error && data) {
+          localUsers.set(tid, data);
+          flushUsersToDisk();
+          return data;
+        }
+      } catch (_) {}
     }
     return localUsers.get(tid) || null;
   },
 
-  async upsertUser({ telegramId, firstName, lastName, username, languageCode, phoneNumber, deliveryAddress, deliveryCity }) {
+  async upsertUser({ telegramId, firstName, lastName, username, languageCode, phoneNumber, phoneVerified, registrationStatus, deliveryAddress, deliveryCity }) {
     const tid = Number(telegramId);
     if (supabaseClient) {
       const payload = {
@@ -515,26 +584,35 @@ export const db = {
       if (username !== undefined) payload.username = username;
       if (languageCode) payload.language_code = languageCode;
       if (phoneNumber) payload.phone_number = phoneNumber;
+      if (phoneVerified !== undefined) payload.phone_verified = phoneVerified;
+      if (registrationStatus) payload.registration_status = registrationStatus;
       if (deliveryAddress) payload.delivery_address = deliveryAddress;
       if (deliveryCity) payload.delivery_city = deliveryCity;
 
-      const { data, error } = await supabaseClient
-        .from('users')
-        .upsert(payload, { onConflict: 'telegram_id' })
-        .select()
-        .single();
+      try {
+        const { data, error } = await withTimeout(
+          supabaseClient
+            .from('users')
+            .upsert(payload, { onConflict: 'telegram_id' })
+            .select()
+            .single()
+        );
 
-      if (error) {
-        console.error('[Supabase Error in upsertUser]:', error.message);
-        if (config.nodeEnv === 'production') throw new Error(`Database error: ${error.message}`);
-      } else if (data) {
-        return data;
+        if (!error && data) {
+          localUsers.set(tid, data);
+          flushUsersToDisk();
+          return data;
+        }
+      } catch (err) {
+        console.warn('[Supabase upsertUser warning]:', err.message);
       }
     }
 
     const existing = localUsers.get(tid) || {
       id: `u-${tid}`,
       telegram_id: tid,
+      registration_status: 'unregistered',
+      phone_verified: false,
       created_at: new Date().toISOString()
     };
 
@@ -545,11 +623,15 @@ export const db = {
       username: username !== undefined ? username : existing.username,
       language_code: languageCode || existing.language_code || 'uz',
       phone_number: phoneNumber || existing.phone_number,
+      phone_verified: phoneVerified !== undefined ? phoneVerified : existing.phone_verified,
+      registration_status: registrationStatus || existing.registration_status || 'unregistered',
       delivery_address: deliveryAddress || existing.delivery_address,
       delivery_city: deliveryCity || existing.delivery_city || 'Tashkent',
-      last_active_at: new Date().toISOString()
+      last_active_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     localUsers.set(tid, updated);
+    flushUsersToDisk();
     return updated;
   },
 

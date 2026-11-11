@@ -7,12 +7,18 @@ export const userController = {
       let user = await db.getUserByTelegramId(telegramId);
 
       if (!user) {
+        const defaultLang = ['uz', 'ru', 'en'].includes(req.telegramUser.language_code)
+          ? req.telegramUser.language_code
+          : 'uz';
+
         user = await db.upsertUser({
           telegramId,
           firstName: req.telegramUser.first_name,
           lastName: req.telegramUser.last_name,
           username: req.telegramUser.username,
-          languageCode: req.telegramUser.language_code || 'uz'
+          languageCode: defaultLang,
+          registrationStatus: 'unregistered',
+          phoneVerified: false
         });
       }
 
@@ -34,6 +40,8 @@ export const userController = {
       const telegramId = req.telegramUser.id;
       const { firstName, lastName, phoneNumber, deliveryAddress, deliveryCity, languageCode } = req.body;
 
+      const validLang = ['uz', 'ru', 'en'].includes(languageCode) ? languageCode : undefined;
+
       const updated = await db.upsertUser({
         telegramId,
         firstName,
@@ -41,7 +49,7 @@ export const userController = {
         phoneNumber,
         deliveryAddress,
         deliveryCity,
-        languageCode
+        languageCode: validLang
       });
 
       res.json({ success: true, data: updated });

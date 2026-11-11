@@ -14,11 +14,14 @@ CREATE TABLE IF NOT EXISTS public.users (
     last_name VARCHAR(150),
     username VARCHAR(100),
     phone_number VARCHAR(50),
+    phone_verified BOOLEAN DEFAULT FALSE,
     language_code VARCHAR(10) DEFAULT 'uz',
+    registration_status VARCHAR(30) DEFAULT 'unregistered',
     delivery_address TEXT,
     delivery_city VARCHAR(100) DEFAULT 'Tashkent',
     is_blocked BOOLEAN DEFAULT FALSE,
     is_admin BOOLEAN DEFAULT FALSE,
+    registered_at TIMESTAMPTZ,
     last_active_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -26,6 +29,8 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON public.users(telegram_id);
 CREATE INDEX IF NOT EXISTS idx_users_language ON public.users(language_code);
+CREATE INDEX IF NOT EXISTS idx_users_registration_status ON public.users(registration_status);
+CREATE INDEX IF NOT EXISTS idx_users_phone_number ON public.users(phone_number);
 
 -- 3. USER ACTIVITY TABLE
 CREATE TABLE IF NOT EXISTS public.user_activity (

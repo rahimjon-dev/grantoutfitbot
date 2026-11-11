@@ -31,12 +31,7 @@ export default function CheckoutModal({ onOrderSuccess }) {
       if (user.last_name) setLastName(user.last_name);
     }
 
-    // Default phone simulation
-    if (!phoneNumber) {
-      setPhoneNumber('+998 90 123 45 67');
-    }
-
-    // Attempt to load existing saved delivery address from API
+    // Attempt to load existing saved profile and delivery address from API
     api.getProfile()
       .then((res) => {
         if (res.data) {

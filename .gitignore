@@ -31,6 +31,9 @@ build/
 **/.cache/
 coverage/
 **/coverage/
+bot/data/*.json
+backend/data/*.json
+!**/data/.gitkeep
 
 # Logs
 *.log

@@ -3,7 +3,14 @@ import { config, validateBotConfig } from './config/index.js';
 import { botDb } from './services/db.js';
 import { handleStart } from './handlers/start.js';
 import { handleLanguageCallback, handleChangeLanguageCommand } from './handlers/language.js';
-import { handleMyOrders, handleProfile, handleSupport, handleContactShare, handleCancel, handleManualPhone } from './handlers/menu.js';
+import { handleRegistrationTextInput, handleContactShare } from './handlers/registration.js';
+import {
+  handleMyOrders,
+  handleProfile,
+  handleProfileCallback,
+  handleSupport,
+  handleCancel
+} from './handlers/menu.js';
 import { handleAdminCallback, handleAdminCommand, handleMyChatMember } from './handlers/admin.js';
 import { getStoreInlineKeyboard } from './keyboards/index.js';
 
@@ -16,13 +23,12 @@ const bot = new Bot(config.botToken || 'dummy_token');
 // Commands
 bot.command('start', handleStart);
 bot.command('admin', handleAdminCommand);
-bot.command('language', handleChangeLanguageCommand);
+bot.command(['language', 'lang'], handleChangeLanguageCommand);
 bot.command('cancel', handleCancel);
 
 // Quick commands to open store
 bot.command(['store', 'shop', 'app', 'open'], async (ctx) => {
-  const user = await botDb.getUser(ctx.from.id);
-  const lang = user?.language_code || 'uz';
+  const lang = await botDb.getUserLanguage(ctx.from.id);
   const label = lang === 'en'
     ? '🛍 *Click below to open GRANT Online Store:*'
     : lang === 'ru'
@@ -38,23 +44,23 @@ bot.command(['store', 'shop', 'app', 'open'], async (ctx) => {
 // Callback queries
 bot.callbackQuery(/^set_lang:/, handleLanguageCallback);
 bot.callbackQuery(/^adm:/, handleAdminCallback);
+bot.callbackQuery(/^prof:/, handleProfileCallback);
 
-// Native contact sharing
+// Native contact sharing (for registration & profile phone update)
 bot.on(':contact', handleContactShare);
 
 // Member status events (tracking block / unblock)
 bot.on('my_chat_member', handleMyChatMember);
 
-// Cancel & Back handlers (matches "⬅️ Bekor qilish / Отмена", "⬅️ Bekor qilish", "⬅️ Отмена", "Cancel", etc.)
+// Cancel & Back handlers (matches "⬅️ Bekor qilish / Отмена", "Bekor qilish", "Отмена", "Cancel")
 bot.hears([/Bekor qilish/i, /Отмена/i, /Cancel/i], handleCancel);
 
-// Manual phone number typing
-bot.hears(/^\+?[0-9\s\-()]{9,20}$/, handleManualPhone);
+// Registration & Profile Edit State Middleware (handles text for first name, last name, phone, or redirects unregistered)
+bot.use(handleRegistrationTextInput);
 
 // Persistent Keyboard Button Matchers (Multilingual & Open Store variants)
-bot.hears([/Onlayn Do‘kon/i, /Онлайн Магазин/i, /Online Store/i, /Open Store/i, /Open Mini App/i, /Do‘konni ochish/i, /Do‘kon/i, /Store/i, /Shop/i], async (ctx) => {
-  const user = await botDb.getUser(ctx.from.id);
-  const lang = user?.language_code || 'uz';
+bot.hears([/Onlayn Do[‘'’]kon/i, /Онлайн Магазин/i, /Online Store/i, /Open Store/i, /Open Mini App/i, /Do[‘'’]kon/i, /Store/i, /Shop/i], async (ctx) => {
+  const lang = await botDb.getUserLanguage(ctx.from.id);
   const promptText = lang === 'en'
     ? '🛍 *GRANT Luxury Fashion Mini App*\nClick below to browse our collection directly in Telegram:'
     : lang === 'ru'
@@ -66,10 +72,26 @@ bot.hears([/Onlayn Do‘kon/i, /Онлайн Магазин/i, /Online Store/i, 
     reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
   });
 });
+
 bot.hears([/Buyurtmalarim/i, /Мои Заказы/i, /My Orders/i], handleMyOrders);
 bot.hears([/Profilim/i, /Мой Профиль/i, /My Profile/i], handleProfile);
-bot.hears([/Tilni o‘zgartirish/i, /Сменить Язык/i, /Change Language/i], handleChangeLanguageCommand);
-bot.hears([/Qo‘llab-quvvatlash/i, /Поддержка/i, /Contact Support/i], handleSupport);
+bot.hears([/Tilni o[‘'’]zgartirish/i, /Сменить Язык/i, /Change Language/i], handleChangeLanguageCommand);
+bot.hears([/Qo[‘'’]llab-quvvatlash/i, /Поддержка/i, /Contact Support/i], handleSupport);
+
+// Fallback for any other message from a registered user
+bot.on('message:text', async (ctx) => {
+  const lang = await botDb.getUserLanguage(ctx.from.id);
+  const promptText = lang === 'en'
+    ? '🛍 *GRANT Luxury Fashion*\nExplore our collection via the menu below or open the Mini App:'
+    : lang === 'ru'
+      ? '🛍 *GRANT Luxury Fashion*\nВоспользуйтесь меню ниже или откройте Mini App для покупок:'
+      : '🛍 *GRANT Luxury Fashion*\nQuyidagi menyudan foydalaning yoki Mini App orqali xarid qiling:';
+
+  await ctx.reply(promptText, {
+    parse_mode: 'Markdown',
+    reply_markup: getStoreInlineKeyboard(lang, config.miniAppUrl)
+  });
+});
 
 // Global Error Handler
 bot.catch((err) => {
